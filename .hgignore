@@ -1,0 +1,6 @@
+syntax: glob
+avr/modbus/Release/*.d
+avr/modbus/Release/*.o
+avr/.vs/*
+avr/modbus/Release/modbus.eep
+avr/modbus/Release/modbus.elf
