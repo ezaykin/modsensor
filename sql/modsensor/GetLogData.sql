@@ -16,6 +16,7 @@ DELIMITER //
 CREATE DEFINER=`root`@`192.168.5.52` PROCEDURE `GetLogData`(
 	IN `SensorDesc` VARCHAR(50),
 	IN `Period` INT
+
 )
     COMMENT 'Возвращает данные для отображения журнала показаний'
 BEGIN
@@ -66,8 +67,9 @@ BEGIN
 	
 	IF SensorId=1 THEN
 		#помещаем в первую строку атмосферное давление на начало выборки
+		SET @LastPressure=`GetLastPressure`(StartTime);
 		UPDATE `TableLogData`
-		SET `TableLogData`.Pressure=`GetLastPressure`(StartTime);
+		SET `TableLogData`.Pressure=@LastPressure;
 		#заполняем остальные данные таблицы результата для внутреннего датчика
 		INSERT INTO `TableLogData` (`TimeId`, `Temperature`, `Pressure`, `Heating`) 
 			(SELECT `TableTimeLog`.TimeId/AvgInterval, `TableTemperatureLog`.Temperature,
