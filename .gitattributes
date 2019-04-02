@@ -1,2 +1,2 @@
 * linguist-vendored
-*.c linguist-language=c
+avr/modbus/*.c linguist-language=c
