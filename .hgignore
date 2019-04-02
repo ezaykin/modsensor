@@ -1,3 +1,0 @@
-syntax: glob
-avr/modbus/Release/*
-avr/.vs/*
