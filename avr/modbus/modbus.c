@@ -11,39 +11,39 @@
 #include "Timers.h"
 #include "Uart.h"
 
-#define ADDR_OFFSET		0
-#define FUNC_OFFSET		1
-#define DATA_OFFSET		2
-#define COUNT_OFFSET	4
+#define ADDR_OFFSET     0
+#define FUNC_OFFSET     1
+#define DATA_OFFSET     2
+#define COUNT_OFFSET    4
 #define FC_COILS_OFFSET 7
 
-#define OUTPUT_LEN_OFFSET		2
-#define OUTPUT_DATA_OFFSET		3
-#define OUTPUT_FCDATA1_OFFSET	2
-#define OUTPUT_FCDATA2_OFFSET	4
+#define OUTPUT_LEN_OFFSET       2
+#define OUTPUT_DATA_OFFSET      3
+#define OUTPUT_FCDATA1_OFFSET   2
+#define OUTPUT_FCDATA2_OFFSET   4
 
-#define READ_COIL_STATUS		0x01
-#define READ_INPUT_STATUS		0x02
-#define READ_INPUT_REGISTERS	0x04
-#define FORCE_SINGLE_COIL		0x05
-#define FORCE_MULTIPLE_COILS	0x0F
+#define READ_COIL_STATUS        0x01
+#define READ_INPUT_STATUS       0x02
+#define READ_INPUT_REGISTERS    0x04
+#define FORCE_SINGLE_COIL       0x05
+#define FORCE_MULTIPLE_COILS    0x0F
 
-#define ERROR_FLAG			0x80
-#define NO_ERRORS			0x00
-#define ILLEGAL_FUNCTION	0x01
-#define ILLEGAL_ADDRESS		0x02
-#define ILLEGAL_DATA_VALUE	0x03
+#define ERROR_FLAG          0x80
+#define NO_ERRORS           0x00
+#define ILLEGAL_FUNCTION    0x01
+#define ILLEGAL_ADDRESS     0x02
+#define ILLEGAL_DATA_VALUE  0x03
 
 
 #define ntohs(a)            htons(a)
 #define OUTPUT_BUFFER_SIZE (MODBUS_INPUTREG_COUNT*2+8)
 
-#define HEADER_LEN	3
-#define FC05_LEN	6
-#define COIL_ON		0xFF00
+#define HEADER_LEN  3
+#define FC05_LEN    6
+#define COIL_ON     0xFF00
 
-extern uint8_t			g_UartBuffer[];
-extern volatile int		g_nUartBytesCount;
+extern uint8_t          g_UartBuffer[];
+extern volatile int     g_nUartBytesCount;
 
 
 uint16_t CRC16(uint8_t *p, uint16_t len);

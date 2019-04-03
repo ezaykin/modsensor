@@ -10,19 +10,19 @@
 #include <util/delay.h>
 #include <string.h>
 
-#define BMP_ADR 0x76
-#define BMP_ID	0x58
-#define BMP_ID_REG		0xD0
-#define BMP_CONFIG_REG	0xF4
-#define BMP_CALIBR_REG	0x88
-#define BMP_DATA_REG	0xF7
+#define BMP_ADR         0x76
+#define BMP_ID          0x58
+#define BMP_ID_REG      0xD0
+#define BMP_CONFIG_REG  0xF4
+#define BMP_CALIBR_REG  0x88
+#define BMP_DATA_REG    0xF7
 
-#define BMP_CTRL_MEAS	((0x05<<5)|(0x05<<2)|(0x03))	//ctrl_meas: mode normal, osrs_p=101, osrs_t=101 
-#define BMP_CONFIG		((0x07<<5)|(0x04<<2))			//config: filter=100, t_sb=111 (4000ms)
+#define BMP_CTRL_MEAS   ((0x05<<5)|(0x05<<2)|(0x03))    //ctrl_meas: mode normal, osrs_p=101, osrs_t=101 
+#define BMP_CONFIG      ((0x07<<5)|(0x04<<2))           //config: filter=100, t_sb=111 (4000ms)
 
-#define TWI_TIMEOUT_MKS		30000
-#define BMP_RETRY_INTERVAL	10
-#define MAX_RETRY_COUNT		5
+#define TWI_TIMEOUT_MKS     30000
+#define BMP_RETRY_INTERVAL  10
+#define MAX_RETRY_COUNT     5
 #define TWI_BAUD            400
 #define BMP_CONFIG_SIZE     4
 

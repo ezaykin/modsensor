@@ -1,12 +1,4 @@
-﻿/*
- * twi.h
- *
- * Created: 29.10.2018 20:15:21
- *  Author: Evgeny
- */ 
-
-
-#ifndef TWI_H_
+﻿#ifndef TWI_H_
 #define TWI_H_
 
 #include <stdint.h>

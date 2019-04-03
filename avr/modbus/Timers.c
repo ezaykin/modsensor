@@ -10,11 +10,11 @@
 #include "Uart.h"
 #include "Globals.h"
 
-#define T0_PERIOD  0.00175
-#define T0_PRESCALER 256
-#define T1_PERIOD 1
-#define T1_PRESCALER 1024
-#define T2_PERIOD_MKS 8
+#define T0_PERIOD       0.00175
+#define T0_PRESCALER    256
+#define T1_PERIOD       1
+#define T1_PRESCALER    1024
+#define T2_PERIOD_MKS   8
 
 #define OCR0A_VALUE (((F_CPU / T0_PRESCALER) * T0_PERIOD) - 1)
 #define OCR1A_VALUE (((F_CPU / T1_PRESCALER) * T1_PERIOD) - 1)

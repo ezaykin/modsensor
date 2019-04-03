@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * EventHandlers.c
  *
  * Created: 26.03.2019 20:14:40
@@ -11,10 +11,10 @@
 #include "RfReceiver.h"
 #include "Bmp280.h"
 
-#define RF_SENSORS_PARAMS_COUNT		2
-#define TEMPERATURE_OFFSET			0
-#define HUMIDITY_OFFSET				1
-#define SENSOR_TIMEOUT				300
+#define RF_SENSORS_PARAMS_COUNT     2
+#define TEMPERATURE_OFFSET          0
+#define HUMIDITY_OFFSET             1
+#define SENSOR_TIMEOUT              300
 
 
 void SetSensorValue(int nSensorIndex, uint16_t nTemperature, uint16_t nHumidity)
@@ -45,7 +45,7 @@ void EventBmpHandler()
 
 void EventTimerHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
 {
-    for (int i=0;i<SENSOR_COUNT;++i)	//ñáðîñ çíà÷åíèé âíåøíèõ äàò÷èêîâ, åñëè äàííûå äîëãî íå îáíîâëÿëèñü
+    for (int i=0;i<SENSOR_COUNT;++i)	//ÑÐ±Ñ€Ð¾Ñ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ð¹ Ð²Ð½ÐµÑˆÐ½Ð¸Ñ… Ð´Ð°Ñ‚Ñ‡Ð¸ÐºÐ¾Ð², ÐµÑÐ»Ð¸ Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð´Ð¾Ð»Ð³Ð¾ Ð½Ðµ Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐ»Ð¸ÑÑŒ
     {
         if ((unTimeCounter-unUpdateTime[i])>SENSOR_TIMEOUT)
         {

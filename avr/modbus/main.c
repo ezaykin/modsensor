@@ -1,4 +1,4 @@
-/*
+п»ї/*
  * modbus.c
  *
  * Created: 27.10.2018 17:03:49
@@ -15,7 +15,7 @@
 #include "RfReceiver.h"
 #include "EventHandlers.h"
 
-#define BMP_PERIOD	30
+#define BMP_PERIOD  30
 
 
 volatile int g_nStatus=0;
@@ -62,17 +62,17 @@ int main(void)
             g_nStatus&=~EVENT_TIMER;
             unTimeCounter++;
             EventTimerHandler(unUpdateTime, unTimeCounter);
-            if (BmpConnected && (0==(unTimeCounter%BMP_PERIOD)))		//периодический запуск получения данных из внутреннего датчика
+            if (BmpConnected && (0==(unTimeCounter%BMP_PERIOD)))		//РїРµСЂРёРѕРґРёС‡РµСЃРєРёР№ Р·Р°РїСѓСЃРє РїРѕР»СѓС‡РµРЅРёСЏ РґР°РЅРЅС‹С… РёР· РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РґР°С‚С‡РёРєР°
             {
                 BmpStart();
             }
         }
-        if (g_nStatus&EVENT_TWI)	//по прерыванию от TWI прочитать данные из BMP280
+        if (g_nStatus&EVENT_TWI)	//РїРѕ РїСЂРµСЂС‹РІР°РЅРёСЋ РѕС‚ TWI РїСЂРѕС‡РёС‚Р°С‚СЊ РґР°РЅРЅС‹Рµ РёР· BMP280
         {
             g_nStatus&=~EVENT_TWI;
             EventBmpHandler();
         }
-        if (g_nStatus&EVENT_RF)		//по приему данных по радиоканалу копируем в регистры MODBUS
+        if (g_nStatus&EVENT_RF)		//РїРѕ РїСЂРёРµРјСѓ РґР°РЅРЅС‹С… РїРѕ СЂР°РґРёРѕРєР°РЅР°Р»Сѓ РєРѕРїРёСЂСѓРµРј РІ СЂРµРіРёСЃС‚СЂС‹ MODBUS
         {
             g_nStatus &= ~(EVENT_RF);
             EventRfHandler(unUpdateTime, unTimeCounter);

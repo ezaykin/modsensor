@@ -1,4 +1,4 @@
-#include <stdint.h>
+﻿#include <stdint.h>
 
 static const uint8_t auchCRCHi[256]=
 {

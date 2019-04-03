@@ -8,8 +8,8 @@
 
 void PioInit()
 {
-	ACSR |= (1<<ACD);	//analog comparator disable
-	ADCSRA =0;	//ADC disable
+	ACSR |= (1<<ACD);   //analog comparator disable
+	ADCSRA =0;          //ADC disable
 	PORTC = (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
 	DDRC |= (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
 }

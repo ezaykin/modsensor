@@ -11,7 +11,7 @@
 #include <avr/interrupt.h>
 #include <util/setbaud.h> //С помощью этих макросов рассчитывается константы UBRRH_VALUE и UBRRL_VALUE
 
-#define UART_BUFFER_SIZE 32
+#define UART_BUFFER_SIZE    32
 
 uint8_t g_UartBuffer[UART_BUFFER_SIZE];
 volatile int  g_nUartBytesCount=0;
