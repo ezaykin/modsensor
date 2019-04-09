@@ -43,13 +43,14 @@ CREATE DEFINER=`root`@`192.168.5.55` PROCEDURE `UpdateCoilsState`(
 
 
 
+
 )
 BEGIN
 #выключаем предупреждение о том, что таблица уже существует
 	SET sql_notes = 0;
 	CREATE TABLE IF NOT EXISTS `TableCurrentCoilsValues` (
 		`ModbusCoil` INT NOT NULL,
-		`UpdateTime` DATETIME NOT NULL,
+		`UpdateTime` DATETIME NULL,
 		`Value` BOOL DEFAULT false,
 		PRIMARY KEY (`ModbusCoil`)
 	)
