@@ -11,10 +11,7 @@
 #include <avr/interrupt.h>
 #include <util/setbaud.h> //С помощью этих макросов рассчитывается константы UBRRH_VALUE и UBRRL_VALUE
 
-#define UART_BUFFER_SIZE    32
-
-uint8_t g_UartBuffer[UART_BUFFER_SIZE];
-volatile int  g_nUartBytesCount=0;
+static void (*pUartIsrHandler)(uint8_t)=0;
 
 void UartInit()
 {
@@ -27,7 +24,6 @@ void UartInit()
 
 void UartStart()
 {
-    g_nUartBytesCount=0;
     UCSR0B = (1<<RXCIE0)|(1<<RXEN0)|(1<<TXEN0);
 }
 
@@ -45,8 +41,16 @@ void UartWrite(uint8_t* pBuffer, int nSize)
     }
 }
 
+void SetUartIsrHandler(void (*IsrHandler)(uint8_t))
+{
+    pUartIsrHandler=IsrHandler;
+}
+
+
 ISR(USART_RX_vect)
 {
-    g_UartBuffer[g_nUartBytesCount++]=UDR0;
-    ModbusTimerStart();
+    if(pUartIsrHandler) 
+    {
+        (*pUartIsrHandler)(UDR0);
+    }
 }

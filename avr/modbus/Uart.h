@@ -13,8 +13,7 @@ void UartInit();
 void UartStart();
 void UartStop();
 void UartWrite(uint8_t* pBuffer, int nSize);
-
-
+void SetUartIsrHandler(void (*IsrHandler)(uint8_t));
 
 
 #endif /* UART_H_ */
