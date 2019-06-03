@@ -11,8 +11,10 @@
 
 #include <stdint.h>
 
-void ModbusTimerInit();
-void ModbusTimerStart();
+void Timer0_Init(void (*IsrHandler)(void));
+void Timer0_Start(uint16_t nPeriodMks);
+void Timer0_Stop();
+
 void PeriodicTimerStart();
 void RfTimerInit();
 void RfTimerStart(int16_t a_nDelay);
