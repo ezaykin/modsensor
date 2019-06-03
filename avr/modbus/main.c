@@ -5,20 +5,26 @@
  *  Author: Evgeny
  */ 
 
-#include <avr/interrupt.h>
-#include <avr/wdt.h>
 #include "Globals.h"
 #include "Modbus.h"
 #include "Bmp280.h"
-#include "Timers.h"
-#include "PIO.h"
 #include "RfReceiver.h"
 #include "EventHandlers.h"
+#include "HAL/Timers.h"
+#include "HAL/PIO.h"
+
+#include <avr/interrupt.h>
+#include <avr/wdt.h>
 
 #define BMP_PERIOD  30
 
 
 volatile int g_nStatus=0;
+
+static void OnPeriodicTimer()
+{
+    g_nStatus|=EVENT_TIMER;
+}
 
 
 int main(void)
@@ -31,26 +37,30 @@ int main(void)
     PioInit();
     ModbusInit();
     ReceiverInit();
+    Timer1Sec_Init(&OnPeriodicTimer);
     sei();
     int BmpConnected=0;
     BmpConnected=BmpInit();
     
+    //выходные регистры внутреннего датчика
     SetInputRegister(BMP_TEMPERATURE_REGISTER,INVALID_TEMPERATURE);
     SetInputRegister(BMP_PRESSURE_REGISTER,0);
 
+    //выходные регистры внешних датчиков
     for (int i=0;i<SENSOR_COUNT;++i)
     {
         SetSensorValue(i,INVALID_TEMPERATURE,INVALID_HUMIDITY);
         unUpdateTime[i]=0;
     }
+    //внешние дискрентные выходы
     for (int i=0;i<MODBUS_COILS_COUNT;++i)
     {
         ClearOutput(i);
     }
     
-    PeriodicTimerStart();
+    Timer1Sec_Start();
     
-    while(1)
+    for(;;)
     {
         if (g_nStatus&EVENT_MODBUS)
         {

@@ -152,6 +152,24 @@
     <Compile Include="Globals.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="HAL\PIO.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\PIO.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\Timers.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\Timers.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\twi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="HAL\twi.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="HAL\Uart.c">
       <SubType>compile</SubType>
     </Compile>
@@ -167,28 +185,10 @@
     <Compile Include="Modbus.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="PIO.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="PIO.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="RfReceiver.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="RfReceiver.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Timers.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Timers.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="twi.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="twi.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

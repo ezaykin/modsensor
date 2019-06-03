@@ -4,13 +4,12 @@
  * Created: 27.10.2018 17:13:34
  *  Author: Evgeny
  */ 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <string.h>
 #include "Globals.h"
 #include "Modbus.h"
-#include "Timers.h"
+#include "HAL/Timers.h"
 #include "HAL/Uart.h"
+
+#include <string.h>
 
 static const int ADDR_OFFSET     = 0;
 static const int FUNC_OFFSET     = 1;
@@ -33,7 +32,7 @@ static const int HEADER_LEN = 3;
 static const int FC05_LEN   = 6;
 static const int COIL_ON    = 0xFF00;
 
-static const int MODBUS_TIMER_PERIOD_MKS = 1750;
+static const int MODBUS_TIMER_PERIOD_MKS = 1750ul;
 
 
 #define READ_COIL_STATUS        0x01
@@ -231,6 +230,7 @@ static int DecodeModbusData(uint8_t* pInputData, int nInputSize, uint8_t* pOutpu
 
 static void OnModbusTimer()
 {
+    TimerModbus_Stop();
     g_nStatus|=EVENT_MODBUS;
 }
 
@@ -240,7 +240,7 @@ static void OnModbusReceiveByte(uint8_t nData)
     {
         stUartData.InputBuffer[stUartData.nBytesCount++]=nData;
     }
-    Timer0_Start(MODBUS_TIMER_PERIOD_MKS);
+    TimerModbus_Start(MODBUS_TIMER_PERIOD_MKS);
 }
 
 void ModbusInit()
@@ -248,7 +248,7 @@ void ModbusInit()
     memset(&stUartData,0,sizeof(stUartData));
     memset(&stModbusData,0,sizeof(stModbusData));
     
-    Timer0_Init(&OnModbusTimer);
+    TimerModbus_Init(&OnModbusTimer);
     UartInit(&OnModbusReceiveByte);
     UartStart();
 }

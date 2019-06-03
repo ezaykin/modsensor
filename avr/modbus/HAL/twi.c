@@ -1,6 +1,6 @@
-﻿#include <avr/interrupt.h>
-#include "Globals.h"
+﻿#include "../Globals.h"
 #include "twi.h"
+#include <avr/interrupt.h>
 
 /****************************************************************************
   Статусные коды TWI модуля 
@@ -41,9 +41,12 @@ volatile static uint8_t ReadSize=0;
 volatile static uint8_t RegBuf[2];
 volatile static uint8_t* pReadBuf;
 
+static void (*pTwiIsrHandler)(void)=0;
 
-uint8_t TWI_MasterInit(uint16_t fr)
+uint8_t TWI_MasterInit(void (*IsrHandler)(), uint16_t fr)
 {
+    pTwiIsrHandler = IsrHandler;
+    
     /*предделители для установки скорости обмена twi модуля*/
     const uint8_t PRE[4] = {2, 8, 32, 128};
     uint8_t i;
@@ -114,7 +117,9 @@ ISR(TWI_vect)
           else                      //это окончание операции записи
           {
             TWCR = (1<<TWEN)|(1<<TWINT)|(1<<TWSTO)|(0<<TWIE); //формируем состояние СТОП, сбрасываем флаг, запрещаем прерывания
-            g_nStatus |= EVENT_TWI;
+            if(pTwiIsrHandler) {
+                (*pTwiIsrHandler)();
+            }
           }
        }
        break;
@@ -134,7 +139,10 @@ ISR(TWI_vect)
     case TWI_MRX_DATA_NACK:       //был принят байт данных без подтверждения      
       pTwiBuf[ptr] = TWDR;
       TWCR = (1<<TWEN)|(1<<TWINT)|(1<<TWSTO); //формируем состояние стоп
-      g_nStatus |= EVENT_TWI;
+      if (pTwiIsrHandler)
+      {
+          (*pTwiIsrHandler)();
+      }
       break; 
      
     case TWI_ARB_LOST:          //был потерян приоритет 

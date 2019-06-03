@@ -4,9 +4,9 @@
  * Created: 29.10.2018 20:16:46
  *  Author: Evgeny
  */ 
-#include "twi.h"
-#include "Timers.h"
 #include "Globals.h"
+#include "HAL/twi.h"
+
 #include <util/delay.h>
 #include <string.h>
 
@@ -94,6 +94,11 @@ static uint32_t bmp280_compensate_P_int32() {
     return x;
 }
 
+static void OnTwiIsr()
+{
+    g_nStatus |= EVENT_TWI;
+}
+
 static int WaitTwiEvent()
 {
     for(int i=0;i<TWI_TIMEOUT_MKS;++i) {
@@ -113,7 +118,7 @@ int BmpInit()
     stBmpCalibrData.DeviceAddr=(BMP_ADR<<1);
     stBmpSensorData.DeviceAddr=(BMP_ADR<<1);
 
-    if(TWI_MasterInit(TWI_BAUD))
+    if(TWI_MasterInit(&OnTwiIsr, TWI_BAUD))
     {
         for (int i=0;i<MAX_RETRY_COUNT;++i)
         {

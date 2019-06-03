@@ -1,11 +1,11 @@
-﻿#include <avr/interrupt.h>
-#include "Globals.h"
+﻿#include "Globals.h"
 #include "RfReceiver.h"
-#include "Timers.h"
+#include "HAL/Timers.h"
+#include "HAL/PIO.h"
 
 #define PULSE_LEN           600         //длительность стартовых импульсов 700 мкс
 #define HALFBIT_LEN         400         //длительность передачи бита 700 мкс
-#define START_PULSE_COUNT   4            //перед 40 битами данных идут 4 стартовых импульса
+#define START_PULSE_COUNT   4           //перед 40 битами данных идут 4 стартовых импульса
 
 #define BUFFER_SIZE 8
 #define PACKET_SIZE 40
@@ -28,23 +28,9 @@ static volatile int nBitCount=0;				//счетчик принятых бит
 
 static void Reset()
 {
-    RfTimerStop();
+    TimerRf_Stop();
     nState=STATE_WAIT_PULSE;
     nBitCount=0;
-}
-
-static void StartReceive()
-{
-    //разрешение внешних прерываний
-    EIFR |= (1<<INTF0);
-    EIMSK |= (1<<INT0);
-}
-
-static void StopReceive()
-{
-    //запрет внешних прерываний
-    EIMSK &= ~(1<<INT0);
-    EIFR |= (1<<INTF0);
 }
 
 static uint8_t GetCRC()
@@ -54,6 +40,116 @@ static uint8_t GetCRC()
         result+=RfBuffer[i];
     }
     return result;
+}
+
+static void OnRfTimer()
+{
+    TimerRf_Stop();
+    switch(nState) {
+        case STATE_PULSE:
+        //2. теперь проверяем максимальную длительность - сигнал должен упасть в интервале 400 мкс
+        nState=STATE_WAIT_PAUSE;
+        TimerRf_Start(HALFBIT_LEN);
+        break;
+        case STATE_PAUSE:
+        //4. проверяем максимальную длительность паузы - включаем таймер. В интервале 400 мкс должен быть импульс
+        TimerRf_Start(HALFBIT_LEN);
+        if (nBitCount<START_PULSE_COUNT) {
+            nState=STATE_WAIT_PULSE;
+        }
+        else {  //если уже принято 4 импульса - стартовая последовательность закончена, следующий импульс будет началом передачи данных
+            nState=STATE_WAIT_START;
+            nBitCount=0;
+        }
+        break;
+        case STATE_BIT:
+        //6. запускаем ожидание следующего бита
+        TimerRf_Start(HALFBIT_LEN);
+        nState=STATE_WAIT_BIT;
+        break;
+        default:
+        //если таймер сработал вне ожидаемого состояния - сбрасываем состояние автомата
+        Reset();
+    }
+}
+
+static void Send()
+{
+    g_nStatus |= EVENT_RF;
+    Reset();
+}
+
+static void Put(int nValue)
+{
+  int ByteIndex=nBitCount/8;
+  RfBuffer[ByteIndex]<<=1;
+  RfBuffer[ByteIndex]|=nValue;
+}
+
+static void OnExternalInt(uint8_t nLevel)
+{
+    // вход внешнего прерывания INT0 - пин D2 порта PORTD
+    // по прерыванию анализируем логический уровень
+    if(nLevel) {
+        switch(nState) {
+        case STATE_WAIT_PULSE:
+            //1. при старте ждем 4 импульса по 700 мкс. Запускаем таймер на 600 мкс для проверки минимальной длительности
+            TimerRf_Start(PULSE_LEN);
+            nBitCount++;            //пока нет приема данных, считаем стартовые импульсы
+            nState=STATE_PULSE;
+            break;
+        case STATE_WAIT_BIT:
+            //9. завершение передачи бита
+            nBitCount++;
+            if (PACKET_SIZE==nBitCount) {
+                //по последнему биту в пакете формируем сигнал для декодера
+                ExternalInt_Disable();
+                Send();
+                break;
+            }
+            //если бит не последний - переходим к приему следующего
+        case STATE_WAIT_START:
+            //5. запускаем таймер на половинную длительность бита. По уровню на момент срабатывания смотрим значение
+            TimerRf_Start(HALFBIT_LEN);
+            nState=STATE_BIT;
+            break;
+        default:
+            //если изменение уровня произошло вне ожидаемого состояния, сбрасываем состояние автомата
+            TimerRf_Start(PULSE_LEN);
+            nBitCount=1;
+            nState=STATE_PULSE;
+        }
+    }
+    else {
+        switch (nState) {
+        case STATE_WAIT_PAUSE:
+            //3. проверяем минимальную длительность паузы между стартовыми импульсами
+            TimerRf_Start(PULSE_LEN);
+            nState=STATE_PAUSE;
+            break;
+        case STATE_BIT:
+            //7. переход в 0 в первую половину периода передачи бита (короткий импульс) - передается 0
+            Put(0);
+            break;
+        case STATE_WAIT_BIT:
+            //8. переход в 0 во вторую половину периода передачи бита (длинный импульс) - передается 1
+            Put(1);
+            break;
+        case STATE_WAIT_PULSE:
+            break;
+        default:
+            //если изменение уровня произошло вне ожидаемого состояния, сбрасываем состояние автомата
+            Reset();
+        }
+    }    
+}
+
+void ReceiverInit()
+{
+    TimerRf_Init(&OnRfTimer);
+    Reset();
+    ExternalInt_Init(&OnExternalInt);
+    ExternalInt_Enable();
 }
 
 //декодирование принятых по радиоканалу данных
@@ -75,117 +171,6 @@ int DecodeSensorData(stSensorData_t* pSensorData)
         
         result=1;
     }
-    StartReceive();
+    ExternalInt_Enable();
     return result;
 }
-
-void ReceiverInit()
-{
-    RfTimerInit();
-    Reset();
-    EICRA = (1<<ISC00); //Any logical change on INT0 generates an interrupt request.
-    StartReceive();
-}
-
-static void Send()
-{
-    g_nStatus |= EVENT_RF;
-    Reset();
-}
-
-static void Put(int nValue)
-{
-  int ByteIndex=nBitCount/8;
-  RfBuffer[ByteIndex]<<=1;
-  RfBuffer[ByteIndex]|=nValue;
-}
-
-ISR(INT0_vect)
-{
-    // вход внешнего прерывания INT0 - пин D2 порта PORTD
-    // по прерыванию анализируем логический уровень
-    if((PIND & (1<<PIND2))) {
-        switch(nState) {
-        case STATE_WAIT_PULSE:
-            //1. при старте ждем 4 импульса по 700 мкс. Запускаем таймер на 600 мкс для проверки минимальной длительности
-            RfTimerStart(PULSE_LEN);
-            nBitCount++;            //пока нет приема данных, считаем стартовые импульсы
-            nState=STATE_PULSE;
-            break;
-        case STATE_WAIT_BIT:
-            //9. завершение передачи бита
-            nBitCount++;
-            if (PACKET_SIZE==nBitCount) {
-                //по последнему биту в пакете формируем сигнал для декодера
-                Send();
-                StopReceive();
-                break;
-            }
-            //если бит не последний - переходим к приему следующего
-        case STATE_WAIT_START:
-            //5. запускаем таймер на половинную длительность бита. По уровню на момент срабатывания смотрим значение
-            RfTimerStart(HALFBIT_LEN);
-            nState=STATE_BIT;
-            break;
-        default:
-            //если изменение уровня произошло вне ожидаемого состояния, сбрасываем состояние автомата
-            RfTimerStart(PULSE_LEN);
-            nBitCount=1;
-            nState=STATE_PULSE;
-        }
-    }
-    else {
-        switch (nState) {
-        case STATE_WAIT_PAUSE:
-            //3. проверяем минимальную длительность паузы между стартовыми импульсами
-            RfTimerStart(PULSE_LEN);
-            nState=STATE_PAUSE;
-            break;
-        case STATE_BIT:
-            //7. переход в 0 в первую половину периода передачи бита (короткий импульс) - передается 0
-            Put(0);
-            break;
-        case STATE_WAIT_BIT:
-            //8. переход в 0 во вторую половину периода передачи бита (длинный импульс) - передается 1
-            Put(1);
-            break;
-        case STATE_WAIT_PULSE:
-            break;
-        default:
-            //если изменение уровня произошло вне ожидаемого состояния, сбрасываем состояние автомата
-            Reset();
-        }
-    }    
-}
-
-ISR(TIMER2_COMPA_vect)
-{
-    RfTimerStop();
-    switch(nState) {
-    case STATE_PULSE:
-        //2. теперь проверяем максимальную длительность - сигнал должен упасть в интервале 400 мкс
-        nState=STATE_WAIT_PAUSE;
-        RfTimerStart(HALFBIT_LEN);
-        break;
-    case STATE_PAUSE:
-        //4. проверяем максимальную длительность паузы - включаем таймер. В интервале 400 мкс должен быть импульс
-        RfTimerStart(HALFBIT_LEN);
-        if (nBitCount<START_PULSE_COUNT) {
-            nState=STATE_WAIT_PULSE;
-        }
-        else {  //если уже принято 4 импульса - стартовая последовательность закончена, следующий импульс будет началом передачи данных
-            nState=STATE_WAIT_START;
-            nBitCount=0;
-        }
-        break;
-    case STATE_BIT:
-        //6. запускаем ожидание следующего бита
-        RfTimerStart(HALFBIT_LEN);
-        nState=STATE_WAIT_BIT;
-        break;
-    default:
-        //если таймер сработал вне ожидаемого состояния - сбрасываем состояние автомата
-        Reset();
-    }
-}
-

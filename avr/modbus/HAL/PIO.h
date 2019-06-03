@@ -13,6 +13,9 @@ void PioInit();
 void SetOutput(int a_nOutput);
 void ClearOutput(int a_nOutput);
 
+void ExternalInt_Init(void (*IsrHandler)(uint8_t nLevel));
+void ExternalInt_Enable();
+void ExternalInt_Disable();
 
 
 #endif /* PIO_H_ */

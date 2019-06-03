@@ -7,9 +7,9 @@
 
 #include "EventHandlers.h"
 #include "Modbus.h"
-#include "PIO.h"
 #include "RfReceiver.h"
 #include "Bmp280.h"
+#include "HAL/PIO.h"
 
 #define RF_SENSORS_PARAMS_COUNT     2
 #define TEMPERATURE_OFFSET          0

@@ -9,6 +9,8 @@
 #ifndef RFRECEIVER_H_
 #define RFRECEIVER_H_
 
+#include <stdint.h>
+
 typedef struct  _SensorData_
 {
 	uint8_t nId;
