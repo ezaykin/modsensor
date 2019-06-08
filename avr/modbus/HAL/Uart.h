@@ -9,6 +9,8 @@
 #ifndef UART_H_
 #define UART_H_
 
+#include <stdint.h>
+
 void UartInit(void (*IsrHandler)(uint8_t));
 void UartStart();
 void UartStop();

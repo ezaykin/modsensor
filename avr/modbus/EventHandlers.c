@@ -26,7 +26,7 @@ void SetSensorValue(int nSensorIndex, uint16_t nTemperature, uint16_t nHumidity)
 void EventModbusHandler()
 {
     ModbusHandler();
-    for(int i=0;i<MODBUS_COILS_COUNT;++i) {
+    for(int i=0; i<MODBUS_COILS_COUNT; ++i) {
         if (GetCoilValue(i))
         {
             SetOutput(i);
@@ -39,8 +39,8 @@ void EventModbusHandler()
 
 void EventBmpHandler()
 {
-    SetInputRegister(BMP_TEMPERATURE_REGISTER,BmpGetTemperature());
-    SetInputRegister(BMP_PRESSURE_REGISTER,BmpGetPressure());
+    SetInputRegister(BMP_TEMPERATURE_REGISTER, BmpGetTemperature());
+    SetInputRegister(BMP_PRESSURE_REGISTER, BmpGetPressure());
 }
 
 void EventTimerHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
@@ -49,7 +49,7 @@ void EventTimerHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
     {
         if ((unTimeCounter-unUpdateTime[i])>SENSOR_TIMEOUT)
         {
-            SetSensorValue(i,INVALID_TEMPERATURE,INVALID_HUMIDITY);
+            SetSensorValue(i, INVALID_TEMPERATURE, INVALID_HUMIDITY);
             unUpdateTime[i]=unTimeCounter;
         }
     }
@@ -62,8 +62,8 @@ void EventRfHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
     {
         if ((SensorData.nChannel>0) && (SensorData.nChannel<=SENSOR_COUNT))
         {
-            int SensorIndex=SensorData.nChannel-1;
-            SetSensorValue(SensorIndex,SensorData.nTemperature,SensorData.nHumidity);
+            int SensorIndex=SensorData.nChannel - 1;
+            SetSensorValue(SensorIndex, SensorData.nTemperature, SensorData.nHumidity);
             SetDiscreteInput(SensorIndex, SensorData.bBattery);
             unUpdateTime[SensorIndex] = unTimeCounter;
         }

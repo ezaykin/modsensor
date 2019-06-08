@@ -29,15 +29,15 @@ static volatile int nBitCount=0;				//счетчик принятых бит
 static void Reset()
 {
     TimerRf_Stop();
-    nState=STATE_WAIT_PULSE;
-    nBitCount=0;
+    nState = STATE_WAIT_PULSE;
+    nBitCount = 0;
 }
 
 static uint8_t GetCRC()
 {
-    uint8_t result=0;
-    for (int i=0;i<CRC_POS;++i) {
-        result+=RfBuffer[i];
+    uint8_t result = 0;
+    for (int i=0; i<CRC_POS; ++i) {
+        result += RfBuffer[i];
     }
     return result;
 }
@@ -48,24 +48,24 @@ static void OnRfTimer()
     switch(nState) {
         case STATE_PULSE:
         //2. теперь проверяем максимальную длительность - сигнал должен упасть в интервале 400 мкс
-        nState=STATE_WAIT_PAUSE;
+        nState = STATE_WAIT_PAUSE;
         TimerRf_Start(HALFBIT_LEN);
         break;
         case STATE_PAUSE:
         //4. проверяем максимальную длительность паузы - включаем таймер. В интервале 400 мкс должен быть импульс
         TimerRf_Start(HALFBIT_LEN);
         if (nBitCount<START_PULSE_COUNT) {
-            nState=STATE_WAIT_PULSE;
+            nState = STATE_WAIT_PULSE;
         }
         else {  //если уже принято 4 импульса - стартовая последовательность закончена, следующий импульс будет началом передачи данных
-            nState=STATE_WAIT_START;
-            nBitCount=0;
+            nState = STATE_WAIT_START;
+            nBitCount = 0;
         }
         break;
         case STATE_BIT:
         //6. запускаем ожидание следующего бита
         TimerRf_Start(HALFBIT_LEN);
-        nState=STATE_WAIT_BIT;
+        nState = STATE_WAIT_BIT;
         break;
         default:
         //если таймер сработал вне ожидаемого состояния - сбрасываем состояние автомата
@@ -73,7 +73,7 @@ static void OnRfTimer()
     }
 }
 
-static void Send()
+static inline void Send()
 {
     g_nStatus |= EVENT_RF;
     Reset();
@@ -81,12 +81,12 @@ static void Send()
 
 static void Put(int nValue)
 {
-  int ByteIndex=nBitCount/8;
-  RfBuffer[ByteIndex]<<=1;
-  RfBuffer[ByteIndex]|=nValue;
+  int ByteIndex = nBitCount/8;
+  RfBuffer[ByteIndex] <<= 1;
+  RfBuffer[ByteIndex] |= nValue;
 }
 
-static void OnExternalInt(uint8_t nLevel)
+static inline void OnExternalInt(uint8_t nLevel)
 {
     // вход внешнего прерывания INT0 - пин D2 порта PORTD
     // по прерыванию анализируем логический уровень
@@ -96,7 +96,7 @@ static void OnExternalInt(uint8_t nLevel)
             //1. при старте ждем 4 импульса по 700 мкс. Запускаем таймер на 600 мкс для проверки минимальной длительности
             TimerRf_Start(PULSE_LEN);
             nBitCount++;            //пока нет приема данных, считаем стартовые импульсы
-            nState=STATE_PULSE;
+            nState = STATE_PULSE;
             break;
         case STATE_WAIT_BIT:
             //9. завершение передачи бита
@@ -111,13 +111,13 @@ static void OnExternalInt(uint8_t nLevel)
         case STATE_WAIT_START:
             //5. запускаем таймер на половинную длительность бита. По уровню на момент срабатывания смотрим значение
             TimerRf_Start(HALFBIT_LEN);
-            nState=STATE_BIT;
+            nState = STATE_BIT;
             break;
         default:
             //если изменение уровня произошло вне ожидаемого состояния, сбрасываем состояние автомата
             TimerRf_Start(PULSE_LEN);
-            nBitCount=1;
-            nState=STATE_PULSE;
+            nBitCount = 1;
+            nState = STATE_PULSE;
         }
     }
     else {
@@ -125,7 +125,7 @@ static void OnExternalInt(uint8_t nLevel)
         case STATE_WAIT_PAUSE:
             //3. проверяем минимальную длительность паузы между стартовыми импульсами
             TimerRf_Start(PULSE_LEN);
-            nState=STATE_PAUSE;
+            nState = STATE_PAUSE;
             break;
         case STATE_BIT:
             //7. переход в 0 в первую половину периода передачи бита (короткий импульс) - передается 0
@@ -159,17 +159,17 @@ int DecodeSensorData(stSensorData_t* pSensorData)
     //  | ID | BATTERY| BUTTON | CHANNEL | TEMPERATURE | HUMIDITY | CRC |
     //  |  8 |    1   |    1   |  3bits  |    12bits   |  8bits   |  8  |
 
-    int result=0;
+    int result = 0;
     if (GetCRC()==RfBuffer[CRC_POS]) {
         pSensorData->nId = RfBuffer[0];
-        pSensorData->bBattery = (RfBuffer[1]>>7)&0x01;
-        pSensorData->nChannel = (RfBuffer[1]>>4)&0x03;
-        int16_t Farengate = RfBuffer[1]&0x0F;
-        Farengate=(Farengate<<8)|RfBuffer[2];
-        pSensorData->nTemperature=(Farengate-320)*5/9-500;
+        pSensorData->bBattery = (RfBuffer[1] >> 7) & 0x01;
+        pSensorData->nChannel = (RfBuffer[1] >> 4) & 0x03;
+        int16_t Farengate = RfBuffer[1] & 0x0F;
+        Farengate = (Farengate << 8) | RfBuffer[2];
+        pSensorData->nTemperature = (Farengate-320)*5/9-500;
         pSensorData->nHumidity = RfBuffer[3];
         
-        result=1;
+        result = 1;
     }
     ExternalInt_Enable();
     return result;

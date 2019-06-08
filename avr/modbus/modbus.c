@@ -32,8 +32,6 @@ static const int HEADER_LEN = 3;
 static const int FC05_LEN   = 6;
 static const int COIL_ON    = 0xFF00;
 
-static const int MODBUS_TIMER_PERIOD_MKS = 1750ul;
-
 
 #define READ_COIL_STATUS        0x01
 #define READ_INPUT_STATUS       0x02
@@ -65,7 +63,7 @@ static uint16_t htons(uint16_t val)
 
 static int ReadCoilStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, int* pOutputLen)
 {
-    int nErrorCode=ILLEGAL_ADDRESS;
+    int nErrorCode = ILLEGAL_ADDRESS;
     if((nCount>0) && ((nRegister+nCount)<=MODBUS_COILS_COUNT))
     {
         //эта версия поддерживает чтение не более 8 значений выходов, поэтому во фрейме фикс. длина 1 байт
@@ -80,19 +78,19 @@ static int ReadCoilStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputB
         }
         pOutputBuffer[OUTPUT_DATA_OFFSET]=CoilsValue;
         *pOutputLen=HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
-        nErrorCode=NO_ERRORS;
+        nErrorCode = NO_ERRORS;
     }
     return nErrorCode;
 }
 
 static int ReadInputStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, int* pOutputLen)
 {
-    int nErrorCode=ILLEGAL_ADDRESS;
+    int nErrorCode = ILLEGAL_ADDRESS;
     if((nCount>0) && ((nRegister+nCount)<=MODBUS_INPUTS_COUNT))
     {
         //эта версия поддерживает чтение не более 8 значений входов, поэтому во фрейме фикс. длина 1 байт
         pOutputBuffer[OUTPUT_LEN_OFFSET] = 1;
-        uint8_t InputsValue=0;
+        uint8_t InputsValue = 0;
         for (int i=0;i<nCount;++i)
         {
             if (stModbusData.nInputs[nRegister+i])
@@ -101,32 +99,32 @@ static int ReadInputStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutput
             }
         }
         pOutputBuffer[OUTPUT_DATA_OFFSET]=InputsValue;
-        *pOutputLen=HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
-        nErrorCode=NO_ERRORS;
+        *pOutputLen = HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
+        nErrorCode = NO_ERRORS;
     }
     return nErrorCode;
-}   
+}  
  
 static int ReadInputRegisters(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, int* pOutputLen)
 {
-    int nErrorCode=ILLEGAL_ADDRESS;
+    int nErrorCode = ILLEGAL_ADDRESS;
     if((nCount>0) && ((nRegister+nCount)<=MODBUS_INPUTREG_COUNT))
     {
         pOutputBuffer[OUTPUT_LEN_OFFSET] = nCount * sizeof(uint16_t);
-        uint16_t* pOutputRegister=(uint16_t*)(pOutputBuffer+OUTPUT_DATA_OFFSET);
-        for (int i=0;i<nCount;++i)
+        uint16_t* pOutputRegister = (uint16_t*)(pOutputBuffer + OUTPUT_DATA_OFFSET);
+        for (int i=0; i<nCount; ++i)
         {
-            *pOutputRegister++=htons(stModbusData.nInputRegisters[nRegister+i]);
+            *pOutputRegister++ = htons(stModbusData.nInputRegisters[nRegister+i]);
         }
-        *pOutputLen=HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
-        nErrorCode=NO_ERRORS;
+        *pOutputLen = HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
+        nErrorCode = NO_ERRORS;
     }
     return nErrorCode;
 }
 
 static int ForceSingeCoil(uint16_t nRegister, uint16_t nValue, uint8_t* pOutputBuffer, int* pOutputLen)
 {
-    int nErrorCode=ILLEGAL_ADDRESS;
+    int nErrorCode = ILLEGAL_ADDRESS;
     if(nRegister<=MODBUS_COILS_COUNT)
     {
         if (nValue==COIL_ON)
@@ -137,16 +135,17 @@ static int ForceSingeCoil(uint16_t nRegister, uint16_t nValue, uint8_t* pOutputB
             stModbusData.nCoils[nRegister]=0;
         }
         else {
-            nErrorCode=ILLEGAL_DATA_VALUE;
+            nErrorCode = ILLEGAL_DATA_VALUE;
         }
+        
         if (NO_ERRORS==nErrorCode)
         {
             uint16_t* pOutputRegister=(uint16_t*)(pOutputBuffer+OUTPUT_FCDATA1_OFFSET);
             *pOutputRegister = htons(nRegister);
             uint16_t* pOutputValue=(uint16_t*)(pOutputBuffer+OUTPUT_FCDATA2_OFFSET);
-            *pOutputValue=htons(nValue);
-            *pOutputLen=FC05_LEN;
-            nErrorCode=NO_ERRORS;
+            *pOutputValue = htons(nValue);
+            *pOutputLen = FC05_LEN;
+            nErrorCode = NO_ERRORS;
         }
     }
     return nErrorCode;
@@ -240,7 +239,7 @@ static void OnModbusReceiveByte(uint8_t nData)
     {
         stUartData.InputBuffer[stUartData.nBytesCount++]=nData;
     }
-    TimerModbus_Start(MODBUS_TIMER_PERIOD_MKS);
+    TimerModbus_Start();
 }
 
 void ModbusInit()

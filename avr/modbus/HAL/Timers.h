@@ -13,7 +13,7 @@
 
 // Timer resolution 16 mks: up to 4096 mks
 void TimerModbus_Init(void (*IsrHandler)(void));
-void TimerModbus_Start(uint16_t nPeriodMks);
+void TimerModbus_Start();
 void TimerModbus_Stop();
 
 // Timer resolution 8 mks: up to 2048 mks
