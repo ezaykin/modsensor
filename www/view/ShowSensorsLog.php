@@ -102,8 +102,9 @@ function CreateOptionsItem($Index, $ItemId)
 
 function ShowSensorLog($Sensor, $SensorData) 
 {
-    //var_dump($SensorData);
-    //return;
+   if (empty($SensorData)) {
+     return;
+   } 
 
     $timelabels=array_keys($SensorData);
 ?>
