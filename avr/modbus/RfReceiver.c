@@ -6,7 +6,7 @@
 static const int PULSE_LEN   = 600;         //длительность стартовых импульсов 700 мкс
 static const int HALFBIT_LEN = 400;         //длительность передачи бита 700 мкс
 static const int START_PULSE_COUNT = 4;     //перед 40 битами данных идут 4 стартовых импульса
-static const int CRC_POS = 4;
+static const int CRC_POS     = 4;
 static const int PACKET_SIZE = 40;
 
 #define BUFFER_SIZE 8
@@ -23,8 +23,8 @@ enum {
     };
 
 static volatile uint8_t RfBuffer[BUFFER_SIZE];	//буфер принятых данных
-static volatile int nState = 0;					//текущее состояние конечного автомата
-static volatile int nBitCount = 0;				//счетчик принятых бит
+static volatile int nState = 0;                 //текущее состояние конечного автомата
+static volatile int nBitCount = 0;              //счетчик принятых бит
 
 static void Reset()
 {
