@@ -47,29 +47,29 @@ static void OnRfTimer()
     TimerRf_Stop();
     switch(nState) {
         case STATE_PULSE:
-        //2. теперь проверяем максимальную длительность - сигнал должен упасть в интервале 400 мкс
-        nState = STATE_WAIT_PAUSE;
-        TimerRf_Start(HALFBIT_LEN);
-        break;
+            //2. теперь проверяем максимальную длительность - сигнал должен упасть в интервале 400 мкс
+            nState = STATE_WAIT_PAUSE;
+            TimerRf_Start(HALFBIT_LEN);
+            break;
         case STATE_PAUSE:
-        //4. проверяем максимальную длительность паузы - включаем таймер. В интервале 400 мкс должен быть импульс
-        TimerRf_Start(HALFBIT_LEN);
-        if (nBitCount<START_PULSE_COUNT) {
-            nState = STATE_WAIT_PULSE;
-        }
-        else {  //если уже принято 4 импульса - стартовая последовательность закончена, следующий импульс будет началом передачи данных
-            nState = STATE_WAIT_START;
-            nBitCount = 0;
-        }
-        break;
+            //4. проверяем максимальную длительность паузы - включаем таймер. В интервале 400 мкс должен быть импульс
+            TimerRf_Start(HALFBIT_LEN);
+            if (nBitCount<START_PULSE_COUNT) {
+                nState = STATE_WAIT_PULSE;
+            }
+            else {  //если уже принято 4 импульса - стартовая последовательность закончена, следующий импульс будет началом передачи данных
+                nState = STATE_WAIT_START;
+                nBitCount = 0;
+            }
+            break;
         case STATE_BIT:
-        //6. запускаем ожидание следующего бита
-        TimerRf_Start(HALFBIT_LEN);
-        nState = STATE_WAIT_BIT;
-        break;
+            //6. запускаем ожидание следующего бита
+            TimerRf_Start(HALFBIT_LEN);
+            nState = STATE_WAIT_BIT;
+            break;
         default:
-        //если таймер сработал вне ожидаемого состояния - сбрасываем состояние автомата
-        Reset();
+            //если таймер сработал вне ожидаемого состояния - сбрасываем состояние автомата
+            Reset();
     }
 }
 
@@ -81,9 +81,9 @@ static inline void Send()
 
 static void Put(int nValue)
 {
-  int ByteIndex = nBitCount/8;
-  RfBuffer[ByteIndex] <<= 1;
-  RfBuffer[ByteIndex] |= nValue;
+    int ByteIndex = nBitCount/8;
+    RfBuffer[ByteIndex] <<= 1;
+    RfBuffer[ByteIndex] |= nValue;
 }
 
 static inline void OnExternalInt(uint8_t nLevel)
