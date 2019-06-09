@@ -3,13 +3,13 @@
 #include "HAL/Timers.h"
 #include "HAL/PIO.h"
 
-#define PULSE_LEN           600         //длительность стартовых импульсов 700 мкс
-#define HALFBIT_LEN         400         //длительность передачи бита 700 мкс
-#define START_PULSE_COUNT   4           //перед 40 битами данных идут 4 стартовых импульса
+static const int PULSE_LEN   = 600;         //длительность стартовых импульсов 700 мкс
+static const int HALFBIT_LEN = 400;         //длительность передачи бита 700 мкс
+static const int START_PULSE_COUNT = 4;     //перед 40 битами данных идут 4 стартовых импульса
+static const int CRC_POS = 4;
+static const int PACKET_SIZE = 40;
 
 #define BUFFER_SIZE 8
-#define PACKET_SIZE 40
-#define CRC_POS     4
 
 //перечень состояний конечного автомата
 enum {				
@@ -23,8 +23,8 @@ enum {
     };
 
 static volatile uint8_t RfBuffer[BUFFER_SIZE];	//буфер принятых данных
-static volatile int nState=0;					//текущее состояние конечного автомата
-static volatile int nBitCount=0;				//счетчик принятых бит
+static volatile int nState = 0;					//текущее состояние конечного автомата
+static volatile int nBitCount = 0;				//счетчик принятых бит
 
 static void Reset()
 {
@@ -101,7 +101,7 @@ static inline void OnExternalInt(uint8_t nLevel)
         case STATE_WAIT_BIT:
             //9. завершение передачи бита
             nBitCount++;
-            if (PACKET_SIZE==nBitCount) {
+            if (PACKET_SIZE == nBitCount) {
                 //по последнему биту в пакете формируем сигнал для декодера
                 ExternalInt_Disable();
                 Send();
@@ -160,7 +160,7 @@ int DecodeSensorData(stSensorData_t* pSensorData)
     //  |  8 |    1   |    1   |  3bits  |    12bits   |  8bits   |  8  |
 
     int result = 0;
-    if (GetCRC()==RfBuffer[CRC_POS]) {
+    if (GetCRC() == RfBuffer[CRC_POS]) {
         pSensorData->nId = RfBuffer[0];
         pSensorData->bBattery = (RfBuffer[1] >> 7) & 0x01;
         pSensorData->nChannel = (RfBuffer[1] >> 4) & 0x03;

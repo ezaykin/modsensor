@@ -17,7 +17,7 @@
 #define EVENT_RF        (1<<3)
 
 
-extern volatile int		g_nStatus;
+extern volatile int	    g_nStatus;
 
 
 #endif /* GLOBALS_H_ */

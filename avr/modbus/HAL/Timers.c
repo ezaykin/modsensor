@@ -19,15 +19,15 @@
 #define T1_PERIOD_MKS   (1000000ul*T1_PRESCALER/F_CPU)
 #define T1_TARGET_PERIOD_MKS   (1000000ul)    //Timer1 1 second interrupt
 
-static void (*pTimer0IsrHandler)(void)=0;
-static void (*pTimer1IsrHandler)(void)=0;
-static void (*pTimer2IsrHandler)(void)=0;
+static void (*pTimer0IsrHandler)(void) = 0;
+static void (*pTimer1IsrHandler)(void) = 0;
+static void (*pTimer2IsrHandler)(void) = 0;
 
 void TimerModbus_Init(void (*IsrHandler)(void))
 {
     TCCR0B = 0;			//stop timer
 	// Set the value that you want to count to
-	OCR0A = ((MODBUS_TIMER_PERIOD_MKS/T0_PERIOD_MKS) - 1);
+	OCR0A = ((MODBUS_TIMER_PERIOD_MKS/T0_PERIOD_MKS)-1);
     pTimer0IsrHandler = IsrHandler;
 	// Set the Timer Mode to CTC
 	TCCR0A = (1<<WGM01);
@@ -62,7 +62,7 @@ void TimerRf_Start(uint16_t nPeriodMks)
     TCNT2 = 0;
     TIFR2 |= (1<<OCF2A);
     // Set the value that you want to count to
-    OCR2A = (nPeriodMks/T2_PERIOD_MKS) - 1;
+    OCR2A = (nPeriodMks/T2_PERIOD_MKS)-1;
     TCCR2B = (1<<CS20)|(1<<CS22);	//set prescaler to 128 and start the timer
 }
 
@@ -75,7 +75,7 @@ void Timer1Sec_Init(void (*IsrHandler)(void))
 {
     TCCR1B = 0;			//stop timer
     pTimer1IsrHandler = IsrHandler;
-	OCR1A = ((T1_TARGET_PERIOD_MKS/T1_PERIOD_MKS) - 1);
+	OCR1A = ((T1_TARGET_PERIOD_MKS/T1_PERIOD_MKS)-1);
     TIMSK1 = (1<<OCIE1A);
 }
 

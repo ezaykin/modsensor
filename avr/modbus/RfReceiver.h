@@ -13,11 +13,11 @@
 
 typedef struct  _SensorData_
 {
-	uint8_t nId;
-	int16_t nTemperature;
-	int8_t nHumidity;
-	int8_t bBattery;
-	int8_t nChannel;
+    uint8_t nId;
+    int16_t nTemperature;
+    int8_t nHumidity;
+    int8_t bBattery;
+    int8_t nChannel;
 }stSensorData_t;
 
 int DecodeSensorData(stSensorData_t* a_stSensorData);

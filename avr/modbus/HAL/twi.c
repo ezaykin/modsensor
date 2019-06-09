@@ -34,10 +34,10 @@
 #define TWSR_MASK     0xfc  
 
 volatile static uint8_t* pTwiBuf;
-volatile static uint8_t twiMsgSize=0;
+volatile static uint8_t twiMsgSize = 0;
 
-volatile static uint8_t ReadingStarted=0;
-volatile static uint8_t ReadSize=0;
+volatile static uint8_t ReadingStarted = 0;
+volatile static uint8_t ReadSize = 0;
 volatile static uint8_t RegBuf[2];
 volatile static uint8_t* pReadBuf;
 
@@ -107,10 +107,10 @@ ISR(TWI_vect)
        else{
           if (ReadingStarted)
           {
-            ReadingStarted=0;		//если выполняется операция чтения, то начинаем вычитывать данные из устройства в буфер
-            pTwiBuf=pReadBuf;
-            pTwiBuf[0]|=0x01;       //устанавливаем бит чтения
-            twiMsgSize=ReadSize;    //при чтении из устройства указатель будет сдвинут на 1 от начала структуры
+            ReadingStarted = 0;		//если выполняется операция чтения, то начинаем вычитывать данные из устройства в буфер
+            pTwiBuf = pReadBuf;
+            pTwiBuf[0] |= 0x01;       //устанавливаем бит чтения
+            twiMsgSize = ReadSize;    //при чтении из устройства указатель будет сдвинут на 1 от начала структуры
             ptr=1;
             TWCR = (1<<TWEN)|(1<<TWIE)|(1<<TWINT)|(1<<TWSTA); //разрешаем прерывание и формируем состояние старт
           }

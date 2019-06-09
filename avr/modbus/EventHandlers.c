@@ -11,10 +11,10 @@
 #include "Bmp280.h"
 #include "HAL/PIO.h"
 
-#define RF_SENSORS_PARAMS_COUNT     2
-#define TEMPERATURE_OFFSET          0
-#define HUMIDITY_OFFSET             1
-#define SENSOR_TIMEOUT              300
+static const int RF_SENSORS_PARAMS_COUNT = 2;
+static const int TEMPERATURE_OFFSET      = 0;
+static const int HUMIDITY_OFFSET         = 1;
+static const int SENSOR_TIMEOUT          = 300;
 
 
 void SetSensorValue(int nSensorIndex, uint16_t nTemperature, uint16_t nHumidity)
@@ -45,12 +45,12 @@ void EventBmpHandler()
 
 void EventTimerHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
 {
-    for (int i=0;i<SENSOR_COUNT;++i)	//сброс значений внешних датчиков, если данные долго не обновлялись
+    for (int i=0; i<SENSOR_COUNT; ++i)	//сброс значений внешних датчиков, если данные долго не обновлялись
     {
         if ((unTimeCounter-unUpdateTime[i])>SENSOR_TIMEOUT)
         {
             SetSensorValue(i, INVALID_TEMPERATURE, INVALID_HUMIDITY);
-            unUpdateTime[i]=unTimeCounter;
+            unUpdateTime[i] = unTimeCounter;
         }
     }
 }
@@ -58,11 +58,11 @@ void EventTimerHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
 void EventRfHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
 {
     stSensorData_t SensorData;
-    if(DecodeSensorData(&SensorData))
+    if (DecodeSensorData(&SensorData))
     {
         if ((SensorData.nChannel>0) && (SensorData.nChannel<=SENSOR_COUNT))
         {
-            int SensorIndex=SensorData.nChannel - 1;
+            int SensorIndex = SensorData.nChannel-1;
             SetSensorValue(SensorIndex, SensorData.nTemperature, SensorData.nHumidity);
             SetDiscreteInput(SensorIndex, SensorData.bBattery);
             unUpdateTime[SensorIndex] = unTimeCounter;

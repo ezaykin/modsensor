@@ -10,21 +10,22 @@
 #include <util/delay.h>
 #include <string.h>
 
-#define BMP_ADR         0x76
-#define BMP_ID          0x58
-#define BMP_ID_REG      0xD0
-#define BMP_CONFIG_REG  0xF4
-#define BMP_CALIBR_REG  0x88
-#define BMP_DATA_REG    0xF7
+static const int BMP_ADR        = 0x76;
+static const int BMP_ID         = 0x58;
+static const int BMP_ID_REG     = 0xD0;
+static const int BMP_CONFIG_REG = 0xF4;
+static const int BMP_CALIBR_REG = 0x88;
+static const int BMP_DATA_REG   = 0xF7;
 
-#define BMP_CTRL_MEAS   ((0x05<<5)|(0x05<<2)|(0x03))    //ctrl_meas: mode normal, osrs_p=101, osrs_t=101 
-#define BMP_CONFIG      ((0x07<<5)|(0x04<<2))           //config: filter=100, t_sb=111 (4000ms)
+static const int BMP_CTRL_MEAS =  ((0x05<<5)|(0x05<<2)|(0x03));    //ctrl_meas: mode normal, osrs_p=101, osrs_t=101 
+static const int BMP_CONFIG    =  ((0x07<<5)|(0x04<<2));           //config: filter=100, t_sb=111 (4000ms)
 
-#define TWI_TIMEOUT_MKS     30000
-#define BMP_RETRY_INTERVAL  10
-#define MAX_RETRY_COUNT     5
-#define TWI_BAUD            400
-#define BMP_CONFIG_SIZE     4
+static const int TWI_TIMEOUT_MKS    = 30000;
+static const int BMP_RETRY_INTERVAL = 10;
+static const int MAX_RETRY_COUNT    = 5;
+static const int TWI_BAUD           = 400;
+
+#define BMP_CONFIG_SIZE 4
 
 static struct __attribute__ ((packed))
 {
@@ -50,8 +51,9 @@ static struct __attribute__ ((packed))
     uint8_t temp[3];
 } stBmpSensorData;
 
-static int32_t t_fine=0;
-/* Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC. (from BMP280 datasheet)*/
+/*(from BMP280 datasheet)*/
+static int32_t t_fine = 0;
+/* Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC. */
 static int32_t bmp280_compensate_T_int32() {
     int32_t var1, var2, T;
     int32_t adc_T = stBmpSensorData.temp[0];
@@ -66,7 +68,7 @@ static int32_t bmp280_compensate_T_int32() {
     return T;
 }
 
-/* Returns pressure in Pa as unsigned 32 bit integer. Output value of “96386” equals 96386 Pa = 963.86 hPa (from BMP280 datasheet)*/
+/* Returns pressure in Pa as unsigned 32 bit integer. Output value of “96386” equals 96386 Pa = 963.86 hPa */
 static uint32_t bmp280_compensate_P_int32() {
     int32_t var1, var2;
     uint32_t x;
@@ -101,9 +103,9 @@ static void OnTwiIsr()
 
 static int WaitTwiEvent()
 {
-    for(int i=0;i<TWI_TIMEOUT_MKS;++i) {
-        if (g_nStatus&EVENT_TWI) {
-            g_nStatus&=~EVENT_TWI;
+    for(int i=0; i<TWI_TIMEOUT_MKS; ++i) {
+        if (g_nStatus & EVENT_TWI) {
+            g_nStatus &= ~EVENT_TWI;
             return 1;
         }
         _delay_us(1);
@@ -113,31 +115,31 @@ static int WaitTwiEvent()
 
 int BmpInit()
 {
-    memset(&stBmpCalibrData,0,sizeof(stBmpCalibrData));
-    memset(&stBmpSensorData,0,sizeof(stBmpSensorData));
-    stBmpCalibrData.DeviceAddr=(BMP_ADR<<1);
-    stBmpSensorData.DeviceAddr=(BMP_ADR<<1);
+    memset(&stBmpCalibrData, 0, sizeof(stBmpCalibrData));
+    memset(&stBmpSensorData, 0, sizeof(stBmpSensorData));
+    stBmpCalibrData.DeviceAddr = (BMP_ADR<<1);
+    stBmpSensorData.DeviceAddr = (BMP_ADR<<1);
 
     if(TWI_MasterInit(&OnTwiIsr, TWI_BAUD))
     {
-        for (int i=0;i<MAX_RETRY_COUNT;++i)
+        for (int i=0; i<MAX_RETRY_COUNT; ++i)
         {
             //для настройки BMP280 используются 3 регистра + 1 регистр адреса
             uint8_t ConfigBuffer[BMP_CONFIG_SIZE];
-            ConfigBuffer[0]=(BMP_ADR<<1);
+            ConfigBuffer[0] = (BMP_ADR<<1);
             //сначала прочитаем ID устройства
-            TwiStartRead(ConfigBuffer,BMP_ID_REG, 2);
+            TwiStartRead(ConfigBuffer, BMP_ID_REG, 2);
             if(WaitTwiEvent()) {
-                if (BMP_ID==ConfigBuffer[1])
+                if (BMP_ID == ConfigBuffer[1])
                 {
                     //прочитаем калибровочные данные
-                    TwiStartRead(&stBmpCalibrData,BMP_CALIBR_REG,sizeof(stBmpCalibrData));
+                    TwiStartRead(&stBmpCalibrData, BMP_CALIBR_REG, sizeof(stBmpCalibrData));
                     if(WaitTwiEvent()) {
                         //запишем настройки в датчик
-                        ConfigBuffer[1]=BMP_CONFIG_REG;
-                        ConfigBuffer[2]=BMP_CTRL_MEAS;
-                        ConfigBuffer[3]=BMP_CONFIG;
-                        TwiStartWrite(ConfigBuffer,BMP_CONFIG_SIZE);
+                        ConfigBuffer[1] = BMP_CONFIG_REG;
+                        ConfigBuffer[2] = BMP_CTRL_MEAS;
+                        ConfigBuffer[3] = BMP_CONFIG;
+                        TwiStartWrite(ConfigBuffer, BMP_CONFIG_SIZE);
                         if(WaitTwiEvent()) {
                             return 1;
                         }
@@ -152,7 +154,7 @@ int BmpInit()
 
 void BmpStart()
 {
-    TwiStartRead(&stBmpSensorData,BMP_DATA_REG,sizeof(stBmpSensorData));
+    TwiStartRead(&stBmpSensorData, BMP_DATA_REG, sizeof(stBmpSensorData));
 }
 
 int16_t BmpGetTemperature()

@@ -11,10 +11,10 @@
 
 #include <stdint.h>
 
-#define MODBUS_ADDR				1
-#define MODBUS_INPUTREG_COUNT	8
-#define MODBUS_COILS_COUNT		4
-#define MODBUS_INPUTS_COUNT		3
+#define MODBUS_ADDR	            1
+#define MODBUS_INPUTREG_COUNT   8
+#define MODBUS_COILS_COUNT      4
+#define MODBUS_INPUTS_COUNT     3
 
 void ModbusInit(void);
 void SetInputRegister(int nRegister, uint16_t nValue);

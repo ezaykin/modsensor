@@ -9,6 +9,8 @@
 #ifndef PIO_H_
 #define PIO_H_
 
+#include <stdint.h>
+
 void PioInit();
 void SetOutput(int a_nOutput);
 void ClearOutput(int a_nOutput);

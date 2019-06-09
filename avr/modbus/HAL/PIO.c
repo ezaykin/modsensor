@@ -11,48 +11,48 @@ static void (*pExtIntIsrHandler)(uint8_t nLevel)=0;
 
 void PioInit()
 {
-	ACSR |= (1<<ACD);   //analog comparator disable
-	ADCSRA =0;          //ADC disable
-	PORTC = (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
-	DDRC |= (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
+    ACSR |= (1<<ACD);   //analog comparator disable
+    ADCSRA =0;          //ADC disable
+    PORTC = (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
+    DDRC |= (1<<PORTC0)|(1<<PORTC1)|(1<<PORTC2)|(1<<PORTC3);
 }
 
 void ClearOutput(int a_nOutput)
 {
-	switch(a_nOutput)
-	{
-		case 0:
-			PORTC |= (1<<PORTC0);
-			break;
-		case 1:
-			PORTC |= (1<<PORTC1);
-			break;
-		case 2:
-			PORTC |= (1<<PORTC2);
-			break;
-		case 3:
-			PORTC |= (1<<PORTC3);
-		break;
+    switch(a_nOutput)
+    {
+        case 0:
+            PORTC |= (1<<PORTC0);
+            break;
+        case 1:
+            PORTC |= (1<<PORTC1);
+            break;
+        case 2:
+            PORTC |= (1<<PORTC2);
+            break;
+        case 3:
+            PORTC |= (1<<PORTC3);
+        break;
 	}
 }
 
 void SetOutput(int a_nOutput)
 {
-	switch(a_nOutput)
-	{
-		case 0:
-			PORTC &= ~(1<<PORTC0);
-			break;
-		case 1:
-			PORTC &= ~(1<<PORTC1);
-			break;
-		case 2:
-			PORTC &= ~(1<<PORTC2);
-			break;
-		case 3:
-			PORTC &= ~(1<<PORTC3);
-		break;
-	}
+    switch(a_nOutput)
+    {
+        case 0:
+            PORTC &= ~(1<<PORTC0);
+            break;
+        case 1:
+            PORTC &= ~(1<<PORTC1);
+            break;
+        case 2:
+            PORTC &= ~(1<<PORTC2);
+            break;
+        case 3:
+            PORTC &= ~(1<<PORTC3);
+            break;
+    }
 }
 
 void ExternalInt_Init(void (*IsrHandler)(uint8_t nLevel))
@@ -75,8 +75,8 @@ void ExternalInt_Disable()
 
 ISR(INT0_vect)
 {
-    if(pExtIntIsrHandler) {
-        if((PIND & (1<<PIND2))) {
+    if (pExtIntIsrHandler) {
+        if (PIND & (1<<PIND2)) {
             (*pExtIntIsrHandler)(1);
         }
         else {
