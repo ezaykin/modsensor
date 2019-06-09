@@ -6,10 +6,10 @@
 //функция возвращает порт и скорость порта MODBUS-устройства
 int GetModbusSettings(MYSQL *pConnection, char* strModbusDevice, int* nBaud)
 {
-    int Result=-1;
+    int Result = RES_ERROR;
     MYSQL_RES* pQueryResult;
     MYSQL_ROW row;
-    char* strQuerySettings="SELECT `TableSettings`.Device, `TableSettings`.Baud from `TableSettings`;";
+    const char* strQuerySettings = "SELECT `TableSettings`.Device, `TableSettings`.Baud from `TableSettings`;";
     //получаем настройки
     if (mysql_query(pConnection, strQuerySettings)>=0) 
     {
@@ -17,10 +17,10 @@ int GetModbusSettings(MYSQL *pConnection, char* strModbusDevice, int* nBaud)
         if (pQueryResult)
         {
             row = mysql_fetch_row(pQueryResult);
-            strncpy(strModbusDevice,row[0],FILENAME_MAX);
-            *nBaud=atoi(row[1]);
+            strncpy(strModbusDevice,row[0], FILENAME_MAX);
+            *nBaud = atoi(row[1]);
             mysql_free_result(pQueryResult);
-            Result=0;
+            Result = RES_OK;
         }
     }
     return Result;
@@ -29,8 +29,8 @@ int GetModbusSettings(MYSQL *pConnection, char* strModbusDevice, int* nBaud)
 //функция открывает таблицу регистров MODBUS, которые есть в базе данных
 MYSQL_RES* OpenRegistersTable(MYSQL *pConnection)
 {
-    MYSQL_RES* pQueryResult=NULL;
-    char* strQuery="SELECT `TableModbusRegisters`.Register from `TableModbusRegisters` ORDER BY `TableModbusRegisters`.Register;";
+    MYSQL_RES* pQueryResult = NULL;
+    char* strQuery = "SELECT `TableModbusRegisters`.Register from `TableModbusRegisters` ORDER BY `TableModbusRegisters`.Register;";
     if (mysql_query(pConnection, strQuery)>=0) 
     {
         pQueryResult = mysql_store_result(pConnection);
@@ -41,8 +41,8 @@ MYSQL_RES* OpenRegistersTable(MYSQL *pConnection)
 //функция открывает таблицу дискретных входов MODBUS, которые есть в базе данных
 MYSQL_RES* OpenInputsTable(MYSQL *pConnection)
 {
-    MYSQL_RES* pQueryResult=NULL;
-    char* strQuery="SELECT `TableModbusInputs`.ModbusInput from `TableModbusInputs` ORDER BY `TableModbusInputs`.ModbusInput;";
+    MYSQL_RES* pQueryResult = NULL;
+    const char* strQuery = "SELECT `TableModbusInputs`.ModbusInput from `TableModbusInputs` ORDER BY `TableModbusInputs`.ModbusInput;";
     if (mysql_query(pConnection, strQuery)>=0) 
     {
         pQueryResult = mysql_store_result(pConnection);
@@ -53,11 +53,11 @@ MYSQL_RES* OpenInputsTable(MYSQL *pConnection)
 //перебирает записи (регистры, дискретные входы) из предварительно открытой таблицы БД
 int GetNextRecord(MYSQL* pConnection, MYSQL_RES* pQueryResult)
 {
-    int nModbusRegister=-1;
-    MYSQL_ROW row;
-    if (row=mysql_fetch_row(pQueryResult))
+    int nModbusRegister = RES_ERROR;
+    MYSQL_ROW row = mysql_fetch_row(pQueryResult);
+    if (row != NULL)
     {
-        nModbusRegister=atoi(row[0]);
+        nModbusRegister = atoi(row[0]);
     }
     return nModbusRegister;
 }
@@ -65,8 +65,8 @@ int GetNextRecord(MYSQL* pConnection, MYSQL_RES* pQueryResult)
 //функция открывает таблицу дискретных входов MODBUS, которые есть в базе данных
 MYSQL_RES* OpenCoilsTable(MYSQL *pConnection)
 {
-    MYSQL_RES* pQueryResult=NULL;
-    char* strQuery="SELECT `TableCurrentCoilsValues`.ModbusCoil, `TableCurrentCoilsValues`.Value from `TableCurrentCoilsValues` ORDER BY `TableCurrentCoilsValues`.ModbusCoil;";
+    MYSQL_RES* pQueryResult = NULL;
+    char* strQuery = "SELECT `TableCurrentCoilsValues`.ModbusCoil, `TableCurrentCoilsValues`.Value from `TableCurrentCoilsValues` ORDER BY `TableCurrentCoilsValues`.ModbusCoil;";
     if (mysql_query(pConnection, strQuery)>=0) 
     {
         pQueryResult = mysql_store_result(pConnection);
@@ -77,15 +77,15 @@ MYSQL_RES* OpenCoilsTable(MYSQL *pConnection)
 //перебирает записи (дискретные выходы) из предварительно открытой таблицы БД
 int GetNextCoil(MYSQL* pConnection, MYSQL_RES* pQueryResult, int* pCoilValue)
 {
-    int nModbusCoil=-1;
-    MYSQL_ROW row;
-    *pCoilValue=0;
-    if (row=mysql_fetch_row(pQueryResult))
+    int nModbusCoil = RES_ERROR;
+    *pCoilValue = 0;
+    MYSQL_ROW row = mysql_fetch_row(pQueryResult);
+    if (row != NULL)
     {
-        nModbusCoil=atoi(row[0]);
-        if(row[1][0]=='1')
+        nModbusCoil = atoi(row[0]); // в первом столбце - номер регистра
+        if(row[1][0] == '1')        // во втором - значение
         {
-           *pCoilValue=1; 
+           *pCoilValue = 1; 
         }
     }
     return nModbusCoil;

@@ -3,6 +3,10 @@
 
 #include <mysql.h>
 
+#define RES_OK    0
+#define RES_ERROR -1
+
+
 //функция возвращает порт и скорость порта MODBUS-устройства
 int GetModbusSettings(MYSQL *con, char* strModbusDevice, int* nBaud);
 
