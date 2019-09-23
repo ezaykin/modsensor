@@ -85,8 +85,7 @@ int UpdateCurrentState(MYSQL *pConnection)
 int UpdateCoilsState(modbus_t *pModbusCtx, MYSQL *pConnection)
 {
     int Result = RES_ERROR;
-    MYSQL_RES* pOpenResult = OpenInputsTable(pConnection);
-    pOpenResult = OpenCoilsTable(pConnection);
+    MYSQL_RES* pOpenResult = OpenCoilsTable(pConnection);
     if(pOpenResult)
     {
         int nModbusCoil;

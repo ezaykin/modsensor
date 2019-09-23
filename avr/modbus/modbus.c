@@ -130,9 +130,11 @@ static int ForceSingeCoil(uint16_t nRegister, uint16_t nValue, uint8_t* pOutputB
         if (nValue == COIL_ON)
         {
             stModbusData.nCoils[nRegister] = 1;
+            nErrorCode = NO_ERRORS;
         }
         else if(nValue == 0){
             stModbusData.nCoils[nRegister] = 0;
+            nErrorCode = NO_ERRORS;
         }
         else {
             nErrorCode = ILLEGAL_DATA_VALUE;
