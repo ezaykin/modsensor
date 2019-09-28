@@ -23,7 +23,7 @@ RETURN (SELECT `TableTimeLog`.EventTime FROM
 	`TableTimeLog` INNER JOIN `TableBatteryStatusLog`
 	ON `TableTimeLog`.TimeId = `TableBatteryStatusLog`.TimeId
 	WHERE `TableBatteryStatusLog`.SensorId=SensorId AND  `TableBatteryStatusLog`.BatteryStatus=1
-	ORDER BY `TableBatteryStatusLog`.TimeId);
+	ORDER BY `TableBatteryStatusLog`.TimeId LIMIT 1);
 END//
 DELIMITER ;
 
