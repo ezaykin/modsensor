@@ -1,9 +1,9 @@
 ﻿/*
- * modbus.h
- *
- * Created: 27.10.2018 17:08:14
- *  Author: Evgeny
- */ 
+* modbus.h
+*
+* Created: 27.10.2018 17:08:14
+*  Author: Evgeny
+*/
 
 
 #ifndef MODBUS_H_
@@ -17,9 +17,9 @@
 #define MODBUS_INPUTS_COUNT     3
 
 void ModbusInit(void);
-void SetInputRegister(int nRegister, uint16_t nValue);
-void SetDiscreteInput(int nInput, uint8_t nValue);
-uint8_t GetCoilValue(int nCoil);
+void SetInputRegister(uint8_t nRegister, uint16_t nValue);
+void SetDiscreteInput(uint8_t nInput, uint8_t nValue);
+uint8_t GetCoilValue(uint8_t nCoil);
 void ModbusHandler(void);
 
 

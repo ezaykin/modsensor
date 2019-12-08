@@ -95,6 +95,7 @@ static uint32_t bmp280_compensate_P_int32() {
     x = (uint32_t)((int32_t) x + ((var1 + var2 + stBmpCalibrData.P7) >> 4));
     return x;
 }
+/*(end of BMP280 datasheet)*/
 
 static void OnTwiIsr()
 {

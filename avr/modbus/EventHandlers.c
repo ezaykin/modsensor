@@ -1,9 +1,9 @@
 ﻿/*
- * EventHandlers.c
- *
- * Created: 26.03.2019 20:14:40
- *  Author: Evgeny
- */ 
+* EventHandlers.c
+*
+* Created: 26.03.2019 20:14:40
+*  Author: Evgeny
+*/
 
 #include "EventHandlers.h"
 #include "Modbus.h"

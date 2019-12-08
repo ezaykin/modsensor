@@ -47,7 +47,7 @@ int main(void)
     //выходные регистры внешних датчиков
     for (int i=0; i<SENSOR_COUNT; ++i)
     {
-        SetSensorValue(i, INVALID_TEMPERATURE,INVALID_HUMIDITY);
+        SetSensorValue(i, INVALID_TEMPERATURE, INVALID_HUMIDITY);
         unUpdateTime[i] = 0;
     }
     //внешние дискрентные выходы
@@ -60,29 +60,29 @@ int main(void)
     
     for(;;)
     {
-        if (g_nStatus&EVENT_MODBUS)
+        if (g_nStatus & EVENT_MODBUS)
         {
             g_nStatus &= ~EVENT_MODBUS;
             EventModbusHandler();
         }
-        if (g_nStatus&EVENT_TIMER)
+        if (g_nStatus & EVENT_TIMER)
         {
             g_nStatus &= ~EVENT_TIMER;
             unTimeCounter++;
             EventTimerHandler(unUpdateTime, unTimeCounter);
-            if (BmpConnected && (0 == (unTimeCounter%BMP_PERIOD)))		//периодический запуск получения данных из внутреннего датчика
+            if (BmpConnected && (0 == (unTimeCounter % BMP_PERIOD)))		//периодический запуск получения данных из внутреннего датчика
             {
                 BmpStart();
             }
         }
-        if (g_nStatus&EVENT_TWI)	//по прерыванию от TWI прочитать данные из BMP280
+        if (g_nStatus & EVENT_TWI)	//по прерыванию от TWI прочитать данные из BMP280
         {
             g_nStatus &= ~EVENT_TWI;
             EventBmpHandler();
         }
-        if (g_nStatus&EVENT_RF)		//по приему данных по радиоканалу копируем в регистры MODBUS
+        if (g_nStatus & EVENT_RF)		//по приему данных по радиоканалу копируем в регистры MODBUS
         {
-            g_nStatus &= ~(EVENT_RF);
+            g_nStatus &= ~EVENT_RF;
             EventRfHandler(unUpdateTime, unTimeCounter);
         }
         wdt_reset();
