@@ -58,81 +58,94 @@ static struct {
 
 static uint16_t htons(uint16_t val)
 {
-    return (val<<8) | (val>>8);
+    return (val << 8) | (val >> 8);
 }
 
 static int ReadCoilStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, uint8_t* pOutputLen)
 {
     int nErrorCode = ILLEGAL_ADDRESS;
-    if((nCount>0) && ((nRegister+nCount)<=MODBUS_COILS_COUNT))
+
+    if ((nCount > 0) && ((nRegister + nCount) <= MODBUS_COILS_COUNT))
     {
         //эта версия поддерживает чтение не более 8 значений выходов, поэтому во фрейме фикс. длина 1 байт
         pOutputBuffer[OUTPUT_LEN_OFFSET] = 1;
         uint8_t CoilsValue = 0;
-        for (int i=0; i<nCount; ++i)
+
+        for (int i = 0; i < nCount; ++i)
         {
-            if (stModbusData.nCoils[nRegister+i])
+            if (stModbusData.nCoils[nRegister + i])
             {
-                CoilsValue |= (1<<i);
+                CoilsValue |= (1 << i);
             }
         }
+
         pOutputBuffer[OUTPUT_DATA_OFFSET] = CoilsValue;
-        *pOutputLen = HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
+        *pOutputLen = HEADER_LEN + pOutputBuffer[OUTPUT_LEN_OFFSET];
         nErrorCode = NO_ERRORS;
     }
+
     return nErrorCode;
 }
 
 static int ReadInputStatus(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, uint8_t* pOutputLen)
 {
     int nErrorCode = ILLEGAL_ADDRESS;
-    if((nCount>0) && ((nRegister+nCount)<=MODBUS_INPUTS_COUNT))
+
+    if ((nCount > 0) && ((nRegister + nCount) <= MODBUS_INPUTS_COUNT))
     {
         //эта версия поддерживает чтение не более 8 значений входов, поэтому во фрейме фикс. длина 1 байт
         pOutputBuffer[OUTPUT_LEN_OFFSET] = 1;
         uint8_t InputsValue = 0;
-        for (int i=0; i<nCount; ++i)
+
+        for (int i = 0; i < nCount; ++i)
         {
-            if (stModbusData.nInputs[nRegister+i])
+            if (stModbusData.nInputs[nRegister + i])
             {
-                InputsValue |= (1<<i);
+                InputsValue |= (1 << i);
             }
         }
+
         pOutputBuffer[OUTPUT_DATA_OFFSET] = InputsValue;
-        *pOutputLen = HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
+        *pOutputLen = HEADER_LEN + pOutputBuffer[OUTPUT_LEN_OFFSET];
         nErrorCode = NO_ERRORS;
     }
+
     return nErrorCode;
 }
 
 static int ReadInputRegisters(uint16_t nRegister, uint16_t nCount, uint8_t* pOutputBuffer, uint8_t* pOutputLen)
 {
     int nErrorCode = ILLEGAL_ADDRESS;
-    if((nCount>0) && ((nRegister+nCount)<=MODBUS_INPUTREG_COUNT))
+
+    if ((nCount > 0) && ((nRegister + nCount) <= MODBUS_INPUTREG_COUNT))
     {
         pOutputBuffer[OUTPUT_LEN_OFFSET] = nCount * sizeof(uint16_t);
         uint16_t* pOutputRegister = (uint16_t*)(pOutputBuffer + OUTPUT_DATA_OFFSET);
-        for (int i=0; i<nCount; ++i)
+
+        for (int i = 0; i < nCount; ++i)
         {
-            *pOutputRegister++ = htons(stModbusData.nInputRegisters[nRegister+i]);
+            *pOutputRegister++ = htons(stModbusData.nInputRegisters[nRegister + i]);
         }
-        *pOutputLen = HEADER_LEN+pOutputBuffer[OUTPUT_LEN_OFFSET];
+
+        *pOutputLen = HEADER_LEN + pOutputBuffer[OUTPUT_LEN_OFFSET];
         nErrorCode = NO_ERRORS;
     }
+
     return nErrorCode;
 }
 
 static int ForceSingeCoil(uint16_t nRegister, uint16_t nValue, uint8_t* pOutputBuffer, uint8_t* pOutputLen)
 {
     int nErrorCode = ILLEGAL_ADDRESS;
-    if(nRegister<MODBUS_COILS_COUNT)
+
+    if (nRegister < MODBUS_COILS_COUNT)
     {
         if (nValue == COIL_ON)
         {
             stModbusData.nCoils[nRegister] = 1;
             nErrorCode = NO_ERRORS;
         }
-        else if(nValue == 0)
+        else if (nValue == 0)
         {
             stModbusData.nCoils[nRegister] = 0;
             nErrorCode = NO_ERRORS;
@@ -140,44 +153,48 @@ static int ForceSingeCoil(uint16_t nRegister, uint16_t nValue, uint8_t* pOutputB
         else {
             nErrorCode = ILLEGAL_DATA_VALUE;
         }
-        
+
         if (NO_ERRORS == nErrorCode)
         {
-            uint16_t* pOutputRegister = (uint16_t*)(pOutputBuffer+OUTPUT_FCDATA1_OFFSET);
+            uint16_t* pOutputRegister = (uint16_t*)(pOutputBuffer + OUTPUT_FCDATA1_OFFSET);
             *pOutputRegister = htons(nRegister);
-            uint16_t* pOutputValue = (uint16_t*)(pOutputBuffer+OUTPUT_FCDATA2_OFFSET);
+            uint16_t* pOutputValue = (uint16_t*)(pOutputBuffer + OUTPUT_FCDATA2_OFFSET);
             *pOutputValue = htons(nValue);
             *pOutputLen = FC05_LEN;
             nErrorCode = NO_ERRORS;
         }
     }
+
     return nErrorCode;
 }
 
 static int ForceMultipleCoils(uint16_t nRegister, uint16_t nCount, uint8_t nCoilsData, uint8_t* pOutputBuffer, uint8_t* pOutputLen)
 {
     int nErrorCode = ILLEGAL_ADDRESS;
-    if((nCount>0) && ((nRegister+nCount)<=MODBUS_COILS_COUNT))
+
+    if ((nCount > 0) && ((nRegister + nCount) <= MODBUS_COILS_COUNT))
     {
         //будет работать только до 8 выходов
-        for (int i=0; i<nCount; ++i)
+        for (int i = 0; i < nCount; ++i)
         {
-            if (nCoilsData & (1<<i))
+            if (nCoilsData & (1 << i))
             {
-                stModbusData.nCoils[nRegister+i] = 1;
+                stModbusData.nCoils[nRegister + i] = 1;
             }
             else
             {
-                stModbusData.nCoils[nRegister+i] = 0;
+                stModbusData.nCoils[nRegister + i] = 0;
             }
         }
-        uint16_t* pOutputRegister=(uint16_t*)(pOutputBuffer+OUTPUT_FCDATA1_OFFSET);
+
+        uint16_t* pOutputRegister = (uint16_t*)(pOutputBuffer + OUTPUT_FCDATA1_OFFSET);
         *pOutputRegister = htons(nRegister);
-        uint16_t* pOutputCount = (uint16_t*)(pOutputBuffer+OUTPUT_FCDATA2_OFFSET);
+        uint16_t* pOutputCount = (uint16_t*)(pOutputBuffer + OUTPUT_FCDATA2_OFFSET);
         *pOutputCount = htons(nCount);
         *pOutputLen = FC05_LEN;
         nErrorCode = NO_ERRORS;
     }
+
     return nErrorCode;
 }
 
@@ -185,48 +202,59 @@ static uint8_t DecodeModbusData(uint8_t* pInputData, uint8_t nInputSize, uint8_t
 {
     uint8_t nErrorCode = NO_ERRORS;
     uint8_t OutputLen = 0;
+
     if (pInputData[ADDR_OFFSET] == MODBUS_ADDR)
     {
-        uint16_t* pCRC = (uint16_t*)(pInputData+nInputSize-2);
-        if (CRC16(pInputData, nInputSize-sizeof(uint16_t)) == ntohs(*pCRC))
+        uint16_t* pCRC = (uint16_t*)(pInputData + nInputSize - sizeof(uint16_t));
+
+        if (CRC16(pInputData, nInputSize - sizeof(uint16_t)) == ntohs(*pCRC))
         {
             pOutputBuffer[ADDR_OFFSET] = MODBUS_ADDR;
             pOutputBuffer[FUNC_OFFSET] = pInputData[FUNC_OFFSET];
-            uint16_t* pRegister = (uint16_t*)(pInputData+DATA_OFFSET);
+            uint16_t* pRegister = (uint16_t*)(pInputData + DATA_OFFSET);
             uint16_t nRegister = htons(*pRegister);
-            uint16_t* pCount = (uint16_t*)(pInputData+COUNT_OFFSET);
+            uint16_t* pCount = (uint16_t*)(pInputData + COUNT_OFFSET);
             uint16_t nCount = ntohs(*pCount);
-            switch(pInputData[FUNC_OFFSET])
+
+            switch (pInputData[FUNC_OFFSET])
             {
-                case READ_COIL_STATUS:
-                    nErrorCode = ReadCoilStatus(nRegister, nCount, pOutputBuffer, &OutputLen);
-                    break;
-                case READ_INPUT_STATUS:
-                    nErrorCode = ReadInputStatus(nRegister, nCount, pOutputBuffer, &OutputLen);
-                    break;
-                case READ_INPUT_REGISTERS:
-                    nErrorCode = ReadInputRegisters(nRegister, nCount, pOutputBuffer, &OutputLen);
-                    break;
-                case FORCE_SINGLE_COIL:
-                    nErrorCode = ForceSingeCoil(nRegister, nCount, pOutputBuffer, &OutputLen);
-                    break;
-                case FORCE_MULTIPLE_COILS:
-                    nErrorCode = ForceMultipleCoils(nRegister, nCount, pInputData[FC_COILS_OFFSET], pOutputBuffer, &OutputLen);
-                    break;
-                default:
-                    nErrorCode=ILLEGAL_FUNCTION;
+            case READ_COIL_STATUS:
+                nErrorCode = ReadCoilStatus(nRegister, nCount, pOutputBuffer, &OutputLen);
+                break;
+
+            case READ_INPUT_STATUS:
+                nErrorCode = ReadInputStatus(nRegister, nCount, pOutputBuffer, &OutputLen);
+                break;
+
+            case READ_INPUT_REGISTERS:
+                nErrorCode = ReadInputRegisters(nRegister, nCount, pOutputBuffer, &OutputLen);
+                break;
+
+            case FORCE_SINGLE_COIL:
+                nErrorCode = ForceSingeCoil(nRegister, nCount, pOutputBuffer, &OutputLen);
+                break;
+
+            case FORCE_MULTIPLE_COILS:
+                nErrorCode = ForceMultipleCoils(nRegister, nCount, pInputData[FC_COILS_OFFSET], pOutputBuffer, &OutputLen);
+                break;
+
+            default:
+                nErrorCode = ILLEGAL_FUNCTION;
             }
-            if (NO_ERRORS!=nErrorCode)
+
+            if (NO_ERRORS != nErrorCode)
             {
                 pOutputBuffer[FUNC_OFFSET] |= ERROR_FLAG;
                 pOutputBuffer[DATA_OFFSET] = nErrorCode;
                 OutputLen = HEADER_LEN;
             }
-            pCRC = (uint16_t*)(pOutputBuffer+OutputLen);
-            *pCRC = htons(CRC16(pOutputBuffer,OutputLen));
+
+            pCRC = (uint16_t*)(pOutputBuffer + OutputLen);
+            *pCRC = htons(CRC16(pOutputBuffer, OutputLen));
             OutputLen += sizeof(uint16_t);
         }
     }
+
     return OutputLen;
 }
 
@@ -238,10 +266,11 @@ static void OnModbusTimer()
 
 static void OnModbusReceiveByte(uint8_t nData)
 {
-    if (stUartData.nBytesCount<UART_BUFFER_SIZE)
+    if (stUartData.nBytesCount < UART_BUFFER_SIZE)
     {
         stUartData.InputBuffer[stUartData.nBytesCount++] = nData;
     }
+
     TimerModbus_Start();
 }
 
@@ -249,7 +278,7 @@ void ModbusInit()
 {
     memset(&stUartData, 0, sizeof(stUartData));
     memset(&stModbusData, 0, sizeof(stModbusData));
-    
+
     TimerModbus_Init(&OnModbusTimer);
     UartInit(&OnModbusReceiveByte);
     UartStart();
@@ -257,7 +286,7 @@ void ModbusInit()
 
 void SetInputRegister(uint8_t nRegister, uint16_t nValue)
 {
-    if (nRegister<MODBUS_INPUTREG_COUNT)
+    if (nRegister < MODBUS_INPUTREG_COUNT)
     {
         stModbusData.nInputRegisters[nRegister] = nValue;
     }
@@ -265,7 +294,7 @@ void SetInputRegister(uint8_t nRegister, uint16_t nValue)
 
 void SetDiscreteInput(uint8_t nInput, uint8_t nValue)
 {
-    if (nInput<MODBUS_INPUTREG_COUNT)
+    if (nInput < MODBUS_INPUTREG_COUNT)
     {
         stModbusData.nInputs[nInput] = nValue;
     }
@@ -274,10 +303,12 @@ void SetDiscreteInput(uint8_t nInput, uint8_t nValue)
 uint8_t GetCoilValue(uint8_t nCoil)
 {
     uint8_t Result = 0;
-    if (nCoil<MODBUS_COILS_COUNT)
+
+    if (nCoil < MODBUS_COILS_COUNT)
     {
         Result = stModbusData.nCoils[nCoil];
     }
+
     return Result;
 }
 
