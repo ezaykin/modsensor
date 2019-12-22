@@ -206,12 +206,12 @@ int DecodeSensorData(stSensorData_t* pSensorData)
             }
         }
     }
-
-//считаем количество одинаковых пакетов
+    //считаем количество одинаковых пакетов
     uint8_t MaxCount = 0;
     uint8_t CmpCount = 0;
     for (uint8_t i = 0; i < unPacketCount - 1; ++i) {
-        for (uint8_t j = i; j < unPacketCount; ++j) {
+        CmpCount = 0;
+        for (uint8_t j = i+1; j < unPacketCount; ++j) {
             if (!memcmp(RfBuffer[i], RfBuffer[j], BUFFER_SIZE)) {
                 CmpCount++;
             }
@@ -221,7 +221,11 @@ int DecodeSensorData(stSensorData_t* pSensorData)
             MaxCount = CmpCount;
             unPacketIndex = i;
         }
-        CmpCount = 0;
+        //если количество совпадений текущего элемента совпадает с оставшимся количеством элемента в массиве, 
+        //значит последующие элементы одинаковые, проверять дальше нет смысла
+        if (CmpCount == (unPacketCount-i-1)) {
+            break;
+        }
     }
 
     if (MaxCount > 1)  {
