@@ -17,7 +17,7 @@
 #define MODBUS_INPUTS_COUNT     3
 
 void ModbusInit(void);
-void SetInputRegister(uint8_t nRegister, uint16_t nValue);
+void SetInputRegister(uint8_t nRegister, int16_t nValue);
 void SetDiscreteInput(uint8_t nInput, uint8_t nValue);
 uint8_t GetCoilValue(uint8_t nCoil);
 void ModbusHandler(void);

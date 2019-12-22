@@ -60,9 +60,9 @@ void EventRfHandler(uint16_t unUpdateTime[], uint16_t unTimeCounter)
     stSensorData_t SensorData;
     if (DecodeSensorData(&SensorData))
     {
-        if ((SensorData.nChannel>0) && (SensorData.nChannel<=SENSOR_COUNT))
+        if ((SensorData.unChannel>0) && (SensorData.unChannel<=SENSOR_COUNT))
         {
-            int SensorIndex = SensorData.nChannel-1;
+            int SensorIndex = SensorData.unChannel-1;
             SetSensorValue(SensorIndex, SensorData.nTemperature, SensorData.nHumidity);
             SetDiscreteInput(SensorIndex, SensorData.bBattery);
             unUpdateTime[SensorIndex] = unTimeCounter;

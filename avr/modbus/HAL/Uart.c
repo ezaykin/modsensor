@@ -33,9 +33,9 @@ void UartStop()
     UCSR0B = 0;
 }
 
-void UartWrite(uint8_t* pBuffer, int nSize)
+void UartWrite(uint8_t* pBuffer, uint16_t unSize)
 {
-    for (int i=0; i<nSize; ++i)
+    for (int i=0; i<unSize; ++i)
     {
         UDR0 = pBuffer[i];
         while (!(UCSR0A & (1<<UDRE0)));

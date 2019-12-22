@@ -34,6 +34,7 @@ int main(void)
     
     PioInit();
     ModbusInit();
+    
     ReceiverInit();
     Timer1Sec_Init(&OnPeriodicTimer);
     sei();

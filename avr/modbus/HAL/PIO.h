@@ -12,10 +12,10 @@
 #include <stdint.h>
 
 void PioInit();
-void SetOutput(int a_nOutput);
-void ClearOutput(int a_nOutput);
+void SetOutput(uint8_t unOutput);
+void ClearOutput(uint8_t unOutput);
 
-void ExternalInt_Init(void (*IsrHandler)(uint8_t nLevel));
+void ExternalInt_Init(void (*IsrHandler)(uint8_t unLevel));
 void ExternalInt_Enable();
 void ExternalInt_Disable();
 
