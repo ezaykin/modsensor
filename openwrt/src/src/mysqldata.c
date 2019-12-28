@@ -7,17 +7,15 @@
 int GetModbusSettings(MYSQL *pConnection, char* strModbusDevice, int* nBaud)
 {
     int Result = RES_ERROR;
-    MYSQL_RES* pQueryResult;
-    MYSQL_ROW row;
     const char* strQuerySettings = "SELECT `TableSettings`.Device, `TableSettings`.Baud from `TableSettings`;";
     //получаем настройки
     if (mysql_query(pConnection, strQuerySettings)>=0) 
     {
-        pQueryResult = mysql_store_result(pConnection);
+        MYSQL_RES* pQueryResult = mysql_store_result(pConnection);
         if (pQueryResult)
         {
-            row = mysql_fetch_row(pQueryResult);
-            strncpy(strModbusDevice,row[0], FILENAME_MAX);
+            MYSQL_ROW row = mysql_fetch_row(pQueryResult);
+            strncpy(strModbusDevice, row[0], FILENAME_MAX);
             *nBaud = atoi(row[1]);
             mysql_free_result(pQueryResult);
             Result = RES_OK;

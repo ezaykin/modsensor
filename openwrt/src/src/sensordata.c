@@ -31,7 +31,7 @@ int FillRegistersData(modbus_t *pModbusCtx, MYSQL *pConnection)
                 break;
             }
             char strQuery[SQL_MAXLEN];
-            sprintf(strQuery,"CALL UpdateModbusRegisterValue('%d', '%d')",nModbusRegister,sRegValue);
+            sprintf(strQuery,"CALL UpdateModbusRegisterValue('%d', '%d')", nModbusRegister, sRegValue);
             if (mysql_query(pConnection, strQuery)<0) 
             {
                 break;

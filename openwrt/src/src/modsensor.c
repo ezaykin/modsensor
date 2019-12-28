@@ -10,12 +10,50 @@ static const char* DATABASE = "modsensor";
 static const char* DB_USER  = "modsensor";
 static const char* DB_PASS  = "modsensor";
 
+static int UpdateDB(modbus_t*pModbusCtx, MYSQL* pConnection)
+{
+    //заполняем таблицы БД аналоговыми параметрами
+    int nModbusResult = FillRegistersData(pModbusCtx, pConnection);
+    if(nModbusResult != RES_ERROR)
+    {
+        //заполняем таблицы БД дискретными параметрами
+        nModbusResult = FillInputsData(pModbusCtx, pConnection);
+        if(nModbusResult != RES_ERROR)
+        {
+            //запуск запроса формирования значений выходов
+            nModbusResult = UpdateCurrentState(pConnection);
+        }
+    }
+    return nModbusResult;
+}
+
+static int UpdateSensorData(MYSQL* pConnection, char* strModbusDevice, int nModbusBaud)
+{
+    int nModbusResult = RES_ERROR;
+    
+    modbus_t* pModbusCtx = modbus_new_rtu(strModbusDevice, nModbusBaud, 'N', 8, 1);
+    if (pModbusCtx != NULL)
+    {
+        //подключаемся к датчику
+        nModbusResult = ConnectSensor(pModbusCtx);
+        if(nModbusResult != RES_ERROR)
+        {
+            //последовательно заполняем таблицы
+            nModbusResult = UpdateDB(pModbusCtx, pConnection);
+            if(nModbusResult != RES_ERROR)
+            {
+                //установка выходов значениями из БД
+                nModbusResult = UpdateCoilsState(pModbusCtx, pConnection);
+            }
+        }
+        modbus_free(pModbusCtx);
+    }
+    return nModbusResult;
+
+}
 
 int main(int argc, char **argv)
 {
-    char strModbusDevice[FILENAME_MAX];
-    int nModbusBaud = 0;
-
     MYSQL *pConnection = mysql_init(NULL);
     int Result = 1;     //Linux return code for general error 
     if (pConnection != NULL)
@@ -23,40 +61,21 @@ int main(int argc, char **argv)
         //подключаемся к БД
         if (mysql_real_connect(pConnection, DBSERVER, DB_USER, DB_PASS, DATABASE, 0, NULL, 0) != NULL)
         {
+            char strModbusDevice[FILENAME_MAX];
+            int nModbusBaud = 0;
             if(GetModbusSettings(pConnection, strModbusDevice, &nModbusBaud) != RES_ERROR)
             {
-                modbus_t* pModbusCtx = modbus_new_rtu(strModbusDevice, nModbusBaud, 'N', 8, 1);
-                if (pModbusCtx != NULL) {
-                    //подключаемся к датчику
-                    int nModbusResult = ConnectSensor(pModbusCtx);
-                    if(nModbusResult != RES_ERROR)
-                    {
-                        //последовательно заполняем таблицы
-                        nModbusResult = FillRegistersData(pModbusCtx, pConnection);
-                        if(nModbusResult != RES_ERROR)
-                        {
-                            nModbusResult = FillInputsData(pModbusCtx, pConnection);
-                            if(nModbusResult != RES_ERROR)
-                            {
-                                //формирование значений выходов
-                                nModbusResult = UpdateCurrentState(pConnection);
-                                if(nModbusResult != RES_ERROR)
-                                {
-                                    //установка выходов
-                                    nModbusResult = UpdateCoilsState(pModbusCtx, pConnection);
-                                    if(nModbusResult != RES_ERROR)
-                                    {
-                                        Result = 0;     // linux return code for OK
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    modbus_free(pModbusCtx);
+                int nModbusResult = UpdateSensorData(pConnection, strModbusDevice, nModbusBaud);
+                if (nModbusResult == RES_OK)
+                {
+                    Result = 0; //Linux return code for OK 
                 }
+                
             }
         }
         mysql_close(pConnection);
     }
     return Result;
 }
+
+
